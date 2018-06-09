@@ -1,0 +1,26 @@
+{
+  "name": "Boomi Flow External Storage",
+  "description": "A microservice that consumes messages from the Boomi Flow External Storage API",
+  "repository": "https://github.com/manywho/external-storage",
+  "logo": "https://s3.amazonaws.com/manywho-service-assets/icons/external-storage.png",
+  "keywords": [
+    "manywho",
+    "boomi",
+    "external",
+    "storage"
+  ],
+  "env": {
+    "DATABASE_URL": {
+      "description": "A JDBC connection string that points to where data should be stored",
+      "required": true
+    },
+    "DATABASE_USERNAME": {
+      "description": "The username to use when connecting to the database",
+      "required": true
+    },
+    "DATABASE_PASSWORD": {
+      "description": "The password to use when connecting to the database",
+      "required": true
+    }
+  }
+}
