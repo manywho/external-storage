@@ -1,4 +1,4 @@
-Boomi Flow External Storage
+Boomi Flow External Storage [![Build Status](https://travis-ci.org/manywho/external-storage.svg?branch=master)](https://travis-ci.org/manywho/external-storage)
 ===========================
 
 > This application is currently in-development, and its API could change without warning!
