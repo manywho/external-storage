@@ -1,8 +1,8 @@
 package com.boomi.flow.external.storage.states;
 
+import com.boomi.flow.external.storage.utils.Environment;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
-import org.jose4j.jwk.JsonWebKey;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
@@ -39,15 +39,15 @@ public class StateManager {
         PublicJsonWebKey receiverKey;
         try {
             // For now use a placeholder, but this would be a store-specific private key, used to decrypt incoming tokens
-            receiverKey = PublicJsonWebKey.Factory.newPublicJwk("{\"kty\":\"RSA\",\"kid\":\"6aa09aee-92ea-4332-81fb-e7a70546b502\",\"n\":\"pP9k3atbDFMlLeso91YPFWz2CVWa-xokmm9eqIyYXb3lEvw0YRCWNL75l2H264-EBD5OWCpvrCuNlQoKTq_epH_IQv7FC_sAMITrJw-yC4Zuh-5_HgiTUHstXjPLxBXS2ATeE6ogzIMMiVNf8-BWABA22KZuL2Fhx_VunlKU-Mz1CKBjAaBdpWmb7SEifuRnUa23Q19KsAzXd-ZHcfeNVYG7UmN_I4V_0dOESMde21966QnLwG5lkvHD3C0Ipo7p3MME9FomWq7eFM_tXR7i7Mwuj4vxeG6hQRaPRnKTQUWHis-Thg1spF6kcVV1RK2FaDeBGgFIuLEnn45o1Dqpnw\",\"e\":\"AQAB\",\"d\":\"L5u5oPR2mwHKsosuEN_2DjqYa20WAOo0MZN8_qlCtZm7ZVT8UB2XGbUZE4Mi2ilY8FiCBpKIEmemvKBfBQFd_p0YTaxxctmD3nwb1fODbivl7Lb2WtYim5BPMOVFIFkjs00EPyxRtnEBxwYVo6rRZcdH7A9pr6YrrqS0vF4bugYCusJIWH9wbBQIVec01fTF9ncOE8FQ71CYM9v5WxnrET0fT52lo456lG4nWNPEsSZz3Pv-qhfzhVV37lKvg1ZPyx5LJR3zIEyzXBfnDRk6NwEblmroZYXBIcmTlJxH9EXxJPmg1dA2_NokDJK1xrOC2_WhQI7Ez0k3L1kIMMGIIQ\",\"p\":\"21wnEpseZKCa3JeCAVDAMYi1BVd_FNreVGoOd2E4BQRQ2txa6pcQfKoDbG80U8FjMBpVHqxmitB6Z7WYDWZiqRMPSS4zoAoPiwkXr5amf9Xfkx4ku_pq0nuBAV9WpJQbL0Je6nASv17NDwsqt2qHVnmtZc49k2Lv88ZanjRvbCk\",\"q\":\"wI60PiQRKcnbmku-xWDOI0aPvhguBCrh5Pr--YfdGMbpxM6OzeDng2aClCQLWMvNfeghtuDgYiyrpycrVafm5ai5CWhmXZ3s9G7MpA2s5V_SLGKc-FmDz_gm4LKOpONKfdMOin96i03yZNDVqk-_i6xHYDpaxZRhWTSGg4bHoIc\",\"dp\":\"0kF9Dh9yvV8XsLLkIKCm55OydwFLxNCY5G6XmSOtT1m4ql8mIc9UNTm8eFYK4PDvQq8qwXDcBNgZS4jKyqVFkeu77hgD0bVy-oBnnJ0Y0FVOrDPrX-aCN2e72nXolW2EtQK3-ZwczCNxB6dbdVz9hgyxAHDzom7lslKAjz2RQyk\",\"dq\":\"syCNn_khVkSH24N3Flo1qS8s7OPFeu8BcWfk5fBzx2bTdNfKlM8Rz3T_KBxXyeTdZrEZG-0aD3oKvNZ9Q5OMAjzw1UWfZJtTIRgpmrt2CXMYK14ZNBbhvgfU8tZoSA-A7of2UPTB5PE_-nUjLuo9AAvl4iim5IJiBQAN2jD5Z-U\",\"qi\":\"F1qBgRNLDUkdbE9g6fLGUJsPzK2HZQx1OqUim9ntwNgbb_Dea2lIOc-VPchBkV2WUabH64WD8QwOnUNJ6OU5YPIHT8uKPuRGD89bPwJ3CvWngIsCwVGcOmgQmp-PWx85GEZgqK-4zhsZezBeuJfKJUreA7Npyr6ErMslVgSVYQg\"}");
+            receiverKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("RECEIVER_KEY"));
         } catch (JoseException e) {
             throw new RuntimeException("Unable to create a JWK instance from the receiver key", e);
         }
 
-        JsonWebKey senderKey;
+        PublicJsonWebKey platformKey;
         try {
             // For now use a placeholder key, but this would be a public key from the Engine, used to verify the integrity of any tokens
-            senderKey = JsonWebKey.Factory.newJwk("{\"kty\":\"RSA\",\"kid\":\"24c6a8e2-fb67-412d-8adb-9cfdf286af44\",\"n\":\"n0985jzxf6koZvEqoTTnPbr8TcwfV_iyAIrzfNHO4F38ASgXlbvORHbcV3dA1llv0XU3j7QY53sQi4bZjJBXDpfSmOKcFg4IhZkongMxiOIFJOyVp5DSC2-i7tVe6annEl71iMmsLn4yq74bQfxo2oTasKwmzHp4aLJvVKrYSPBSC9L1aye3oZyXqqRix5RkYcCFupOUzqtNojl2RnB_N5Vzz4bfhITX9YvmPMSsLxPAv24mWgkgi_ZH9Y6dbWNZmXxA2rM4KUSQmGcx1zdGG8g_FsSV3iaks9tICdKkiu9OEiT2G6phXL73_7Dr9qleEgNiok08eF-_X9HIpsh0Vw\",\"e\":\"AQAB\"}");
+            platformKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("PLATFORM_KEY"));
         } catch (JoseException e) {
             throw new RuntimeException("Unable to create a JWK instance from the sender key", e);
         }
@@ -64,7 +64,7 @@ public class StateManager {
                 .setExpectedIssuer("manywho")
                 .setExpectedAudience("receiver") // TODO: Change this to the store ID
                 .setDecryptionKey(receiverKey.getPrivateKey())
-                .setVerificationKey(senderKey.getKey())
+                .setVerificationKey(platformKey.getKey())
                 .setJwsAlgorithmConstraints(jwsAlgorithmConstraints)
                 .setJweAlgorithmConstraints(jweAlgorithmConstraints)
                 .setJweContentEncryptionAlgorithmConstraints(jceAlgorithmConstraints)
