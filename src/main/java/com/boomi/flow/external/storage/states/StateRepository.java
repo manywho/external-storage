@@ -22,7 +22,7 @@ public class StateRepository {
     public void save(UUID tenant, List<State> states) {
         jdbi.withHandle(handle -> {
             // Insert a new state, or update an existing one if one exists and the one we have is newer
-            var batch = handle.prepareBatch("INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content, token) VALUES (:id, :tenant, :parent, :flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :createdAt, :updatedAt, :content::jsonb, :token) ON CONFLICT (id) DO UPDATE SET (flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, updated_at, content, token) = (:flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :updatedAt, :content::jsonb, :token) WHERE states.updated_at <= :updatedAt");
+            var batch = handle.prepareBatch("INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content, token) VALUES (:id, :tenant, :parent, :flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :createdAt, :updatedAt, :content::jsonb, :token) ON CONFLICT (id) DO UPDATE SET (flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, updated_at, content, token) = (:flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :updatedAt, :content::jsonb, :token) WHERE states.id = :id AND states.updated_at <= :updatedAt");
 
             for (State state : states) {
                 LOGGER.info("Saving a state with the ID {} in the tenant {}", state.getId(), tenant);
