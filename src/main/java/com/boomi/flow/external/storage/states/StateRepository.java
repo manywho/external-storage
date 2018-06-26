@@ -46,13 +46,13 @@ public class StateRepository {
         });
     }
 
-    public Optional<StateResponse> find(UUID tenant, UUID id) {
+    public Optional<String> find(UUID tenant, UUID id) {
         LOGGER.info("Loading state with the ID {} from the tenant {}", id, tenant);
 
-        return jdbi.withHandle(handle -> handle.createQuery("SELECT token FROM states WHERE id = :id AND tenant_id = :tenant")
+        return jdbi.withHandle(handle -> handle.createQuery("SELECT content FROM states WHERE id = :id AND tenant_id = :tenant")
                 .bind("id", id)
                 .bind("tenant", tenant)
-                .mapToBean(StateResponse.class)
+                .mapTo(String.class)
                 .findFirst());
     }
 }

@@ -3,7 +3,11 @@ package com.boomi.flow.external.storage.states;
 import com.boomi.flow.external.storage.utils.Environment;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
+import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
+import org.jose4j.jwe.JsonWebEncryption;
+import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
 import org.jose4j.jwk.PublicJsonWebKey;
+import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
@@ -20,7 +24,7 @@ import java.util.UUID;
 
 import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.*;
 import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.*;
-import static org.jose4j.jws.AlgorithmIdentifiers.RSA_USING_SHA384;
+import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384;
 
 public class StateManager {
     private final StateRepository repository;
@@ -31,8 +35,69 @@ public class StateManager {
     }
 
     public StateResponse findState(UUID tenant, UUID id) {
-        return repository.find(tenant, id)
+        var state = repository.find(tenant, id)
                 .orElseThrow(NotFoundException::new);
+
+        PublicJsonWebKey receiverKey;
+        try {
+            // For now use a placeholder, but this would be a store-specific private key, used to decrypt incoming tokens
+            receiverKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("RECEIVER_KEY"));
+        } catch (JoseException e) {
+            throw new RuntimeException("Unable to create a JWK instance from the receiver key", e);
+        }
+
+        PublicJsonWebKey platformKey;
+        try {
+            // For now use a placeholder key, but this would be a public key from the platform, used to verify the integrity of any tokens
+            platformKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("PLATFORM_KEY"));
+        } catch (JoseException e) {
+            throw new RuntimeException("Unable to create a JWK instance from the platform key", e);
+        }
+
+        // Create the claims, which will be the content of the JWT
+        JwtClaims claims = new JwtClaims();
+        claims.setIssuer("receiver");  // who creates the token and signs it
+        claims.setAudience("manywho"); // to whom the token is intended to be sent
+        claims.setExpirationTimeMinutesInTheFuture(10); // time when the token will expire (10 minutes from now)
+        claims.setGeneratedJwtId(); // a unique identifier for the token
+        claims.setIssuedAtToNow();  // when the token was issued/created (now)
+        claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
+        claims.setSubject(id.toString()); // the subject/principal is whom the token is about
+
+        // Add the state metadata as claims, so any verifying consumer gets undeniably correct information
+        claims.setClaim("content", state);
+
+        // Create the signature for the actual content
+        JsonWebSignature jws = new JsonWebSignature();
+        jws.setAlgorithmHeaderValue(ECDSA_USING_P384_CURVE_AND_SHA384); // TODO: Check this
+        jws.setKey(receiverKey.getPrivateKey());
+        jws.setKeyIdHeaderValue("24c6a8e2-fb67-412d-8adb-9cfdf286af44");
+        jws.setPayload(claims.toJson());
+
+        String signature;
+        try {
+            signature = jws.getCompactSerialization();
+        } catch (JoseException e) {
+            // TODO: Do something...
+            throw new RuntimeException(e);
+        }
+
+        // The outer shell
+        JsonWebEncryption jwe = new JsonWebEncryption();
+        jwe.enableDefaultCompression();
+        jwe.setContentTypeHeaderValue("JWT");
+        jwe.setPayload(signature);
+        jwe.setAlgorithmHeaderValue(KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW);
+        jwe.setEncryptionMethodHeaderParameter(ContentEncryptionAlgorithmIdentifiers.AES_192_CBC_HMAC_SHA_384);
+        jwe.setKey(platformKey.getKey());
+        jwe.setKeyIdHeaderValue(platformKey.getKeyId());
+
+        try {
+            return new StateResponse(jwe.getCompactSerialization());
+        } catch (JoseException e) {
+            // TODO: Do something...
+            throw new RuntimeException(e);
+        }
     }
 
     public void saveStates(UUID tenant, List<StateRequest> stateRequests) {
@@ -46,16 +111,16 @@ public class StateManager {
 
         PublicJsonWebKey platformKey;
         try {
-            // For now use a placeholder key, but this would be a public key from the Engine, used to verify the integrity of any tokens
+            // For now use a placeholder key, but this would be a public key from the platform, used to verify the integrity of any tokens
             platformKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("PLATFORM_KEY"));
         } catch (JoseException e) {
-            throw new RuntimeException("Unable to create a JWK instance from the sender key", e);
+            throw new RuntimeException("Unable to create a JWK instance from the platform key", e);
         }
 
         // Create constraints for the algorithms that incoming tokens need to use, otherwise decoding will fail
-        var jwsAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, RSA_USING_SHA384);
-        var jweAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, RSA_OAEP, RSA_OAEP_256, ECDH_ES, ECDH_ES_A192KW, ECDH_ES_A256KW);
-        var jceAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, AES_192_GCM, AES_192_CBC_HMAC_SHA_384, AES_256_GCM, AES_256_CBC_HMAC_SHA_512);
+        var jwsAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, ECDSA_USING_P384_CURVE_AND_SHA384);
+        var jweAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, ECDH_ES_A192KW, ECDH_ES_A256KW);
+        var jceAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, AES_192_CBC_HMAC_SHA_384, AES_256_CBC_HMAC_SHA_512);
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setRequireExpirationTime()
