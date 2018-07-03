@@ -15,6 +15,14 @@ The available configuration settings for the application are:
 * **DATABASE_URL:** A JDBC connection string that points to where data should be stored, e.g. `jdbc:postgresql://localhost/flow`
 * **DATABASE_USERNAME** The username to use when connecting to the database
 * **DATABASE_PASSWORD** The password to use when connecting to the database
+* **DATABASE_TYPE** The database type, postgresql, sqlserver and mysql are currently supported
+* **RECEIVER_KEY** You can get this value from the Boomi Flow platform
+* **PLATFORM_KEY** You can get this value from the Boomi Flow platform
+
+> **DATABASE_URL** examples
+> * **mysql** jdbc:mysql://your-host.com/external_storage_db
+> * **postgresql** jdbc:postgresql://your-host.com/external_storage_db
+> * **sqlserver** jdbc:sqlserver://your-host.com;database=external_storage_db
 
 > **Note:** Database migrations are run automatically on startup, so the schema should always be up-to-date
 
@@ -24,7 +32,13 @@ You will have to configure the application at runtime by using environment varia
 application from the command line:
 
 ```bash
-$ DATABASE_URL=jdbc:postgresql://localhost/flow DATABASE_USERNAME=manywho DATABASE_PASSWORD=password java -jar target/external-storage.jar
+$ DATABASE_URL=jdbc:postgresql://localhost/flow \
+DATABASE_USERNAME=manywho \
+DATABASE_PASSWORD=password \
+DATABASE_TYPE=type \
+RECEIVER_KEY=receiverkey \
+PLATFORM_KEY=platformkey \
+java -jar target/external-storage.jar
 ```
 
 ### Building
@@ -64,7 +78,6 @@ Contributions are welcome to the project - whether they are feature requests, im
 
 ## Roadmap
 
-* Support for databases out of the box, other than PostgreSQL
 * Example deployments, e.g. Heroku, Kubernetes, systemd
 * Tests, including Heroku
 

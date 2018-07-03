@@ -15,13 +15,12 @@ public class Application {
         hikariConfig.setMaximumPoolSize(1);
         hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
         hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
-
         HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
 
         // Run the migrations, then destroy the single-connection pool
         Flyway flyway = new Flyway();
         flyway.setDataSource(hikariDataSource);
-        flyway.setLocations("migrations");
+        flyway.setLocations(String.format("migrations/%s", Environment.get("DATABASE_TYPE").toLowerCase()));
         flyway.migrate();
 
         hikariDataSource.close();

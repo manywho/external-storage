@@ -21,6 +21,18 @@
     "DATABASE_PASSWORD": {
       "description": "The password to use when connecting to the database",
       "required": true
+    },
+    "DATABASE_TYPE": {
+      "description": "The type of database (postgresql, mysql or sqlserver)",
+      "required": true
+    },
+    "RECEIVER_KEY": {
+      "description": "You can get this value from the Boomi Flow platform",
+      "required": true
+    },
+    "PLATFORM_KEY": {
+      "description": "You can get this value from the Boomi Flow platform",
+      "required": true
     }
   }
 }

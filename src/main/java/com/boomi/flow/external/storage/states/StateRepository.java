@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,11 +37,19 @@ public class StateRepository {
                         .bind("isDone", state.isDone())
                         .bind("currentMapElement", state.getCurrentMapElementId())
                         .bind("currentUser", state.getCurrentUserId())
-                        .bind("createdAt", state.getCreatedAt())
-                        .bind("updatedAt", state.getUpdatedAt())
                         .bind("content", state.getContent())
-                        .bind("token", state.getToken())
-                        .add();
+                        .bind("token", state.getToken());
+
+                // we save every date in utc zone if we are using mysql
+                if ("mysql".equals(System.getenv("DATABASE_TYPE").toLowerCase())) {
+                    batch.bind("createdAt", state.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC))
+                            .bind("updatedAt", state.getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC));
+                } else {
+                    batch.bind("createdAt", state.getCreatedAt())
+                            .bind("updatedAt", state.getUpdatedAt());
+                }
+
+                batch.add();
             }
 
             return batch.execute();

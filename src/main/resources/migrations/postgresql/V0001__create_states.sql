@@ -1,8 +1,6 @@
 create table states
 (
-  id uuid not null
-    constraint pk_states
-    primary key,
+  id uuid not null constraint pk_states primary key,
   tenant_id uuid not null,
   parent_id uuid,
   flow_id uuid not null,
