@@ -26,14 +26,7 @@ public class SqlServerRepository  extends StateRepository {
 
         batch.add();
     }
-/*
-    MERGE states as  Target
-    USING states as states2 ON states2.id = :id
-    WHEN MATCHED AND  states2.updated_at <= '123' THEN
-    UPDATE SET flow_id = 'A'
-    WHEN NOT MATCHED THEN
-    INSERT INTO states1 (id,  flow_id) VALUES ('A','b')
-  */
+    
     @Override
     protected String upsertQuery() {
         return "MERGE states as Target " +
