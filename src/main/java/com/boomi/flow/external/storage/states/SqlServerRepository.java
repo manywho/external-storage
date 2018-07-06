@@ -26,7 +26,7 @@ public class SqlServerRepository  extends StateRepository {
 
         batch.add();
     }
-    
+
     @Override
     protected String upsertQuery() {
         return "MERGE states as Target " +
