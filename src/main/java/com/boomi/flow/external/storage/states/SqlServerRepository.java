@@ -22,9 +22,8 @@ public class SqlServerRepository  extends StateRepository {
                 .bind("currentUser", state.getCurrentUserId())
                 .bind("content", state.getContent())
                 .bind("createdAt", state.getCreatedAt())
-                .bind("updatedAt", state.getUpdatedAt());
-
-        batch.add();
+                .bind("updatedAt", state.getUpdatedAt())
+                .add();
     }
 
     @Override

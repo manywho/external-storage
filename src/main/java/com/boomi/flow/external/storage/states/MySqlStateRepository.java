@@ -23,9 +23,8 @@ public class MySqlStateRepository extends StateRepository {
                 .bind("currentUser", convertUuidToString(state.getCurrentUserId()))
                 .bind("content", state.getContent())
                 .bind("createdAt", state.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC))
-                .bind("updatedAt", state.getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC));
-
-        batch.add();
+                .bind("updatedAt", state.getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC))
+                .add();
     }
 
     private Integer convertBoolean(boolean value) {

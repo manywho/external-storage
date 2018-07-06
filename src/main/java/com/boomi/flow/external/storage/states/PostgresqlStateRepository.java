@@ -23,8 +23,6 @@ public class PostgresqlStateRepository extends StateRepository {
                 .bind("createdAt", state.getCreatedAt())
                 .bind("updatedAt", state.getUpdatedAt())
                 .add();
-
-        batch.add();
     }
 
     @Override
