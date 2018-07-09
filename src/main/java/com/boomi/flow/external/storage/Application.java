@@ -1,6 +1,6 @@
 package com.boomi.flow.external.storage;
 
-import com.boomi.flow.external.storage.utils.DatabaseTypeValidator;
+import com.boomi.flow.external.storage.migrations.DatabaseMigrations;
 import com.boomi.flow.external.storage.utils.Environment;
 import com.manywho.sdk.services.servers.EmbeddedServer;
 import com.manywho.sdk.services.servers.undertow.UndertowServer;
@@ -21,8 +21,8 @@ public class Application {
         // Run the migrations, then destroy the single-connection pool
         Flyway flyway = new Flyway();
         flyway.setDataSource(hikariDataSource);
-        DatabaseTypeValidator.validate();
-        flyway.setLocations(String.format("migrations/%s", Environment.get("DATABASE_TYPE").toLowerCase()));
+        String migrationPath = DatabaseMigrations.migrationPath(hikariDataSource.getConnection());
+        flyway.setLocations(migrationPath);
         flyway.migrate();
 
         hikariDataSource.close();
