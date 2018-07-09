@@ -46,4 +46,10 @@ public class StateController {
     public void saveStates(@PathParam("tenant") UUID tenant, @Valid List<StateRequest> states) {
         manager.saveStates(tenant, states);
     }
+
+    @DELETE
+    @Path("/{tenant}")
+    public void deleteStates(@PathParam("tenant") UUID tenant, @Valid List<UUID> ids) {
+        manager.deleteStates(tenant, ids);
+    }
 }

@@ -34,6 +34,10 @@ public class StateManager {
         this.repository = repository;
     }
 
+    public void deleteStates(UUID tenant, List<UUID> ids) {
+        // TODO
+    }
+
     public StateResponse findState(UUID tenant, UUID id) {
         var state = repository.find(tenant, id)
                 .orElseThrow(NotFoundException::new);
