@@ -3,9 +3,9 @@ package com.boomi.flow.external.storage.states;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 
-public class SqlServerRepository  extends StateRepository {
+public class SqlServerDatabaseRepository extends StateDatabaseRepository {
 
-    public SqlServerRepository(Jdbi jdbi)
+    public SqlServerDatabaseRepository(Jdbi jdbi)
     {
         super(jdbi);
     }
