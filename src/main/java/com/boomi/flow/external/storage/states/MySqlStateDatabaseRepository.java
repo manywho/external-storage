@@ -5,9 +5,9 @@ import org.jdbi.v3.core.statement.PreparedBatch;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
-public class MySqlStateRepository extends StateRepository {
+public class MySqlStateDatabaseRepository extends StateDatabaseRepository {
 
-    public MySqlStateRepository(Jdbi jdbi) {
+    public MySqlStateDatabaseRepository(Jdbi jdbi) {
         super(jdbi);
     }
 

@@ -6,6 +6,8 @@ import com.boomi.flow.external.storage.utils.Environment;
 import com.google.inject.Provider;
 import org.jdbi.v3.core.Jdbi;
 
+import java.net.URI;
+
 public class StateRepositoryProvider implements Provider<StateRepository> {
     private final Jdbi jdbi;
 
@@ -16,15 +18,17 @@ public class StateRepositoryProvider implements Provider<StateRepository> {
 
     @Override
     public StateRepository get() {
-        String databaseType = Environment.get("DATABASE_TYPE").toLowerCase();
+        String databaseType = URI.create(Environment.get("DATABASE_URL").substring(5)).getScheme();
 
         switch (databaseType) {
             case "mysql":
-                return new MySqlStateRepository(jdbi);
+                return new MySqlStateDatabaseRepository(jdbi);
             case "sqlserver":
-                return new SqlServerRepository(jdbi);
-            default:
-                return new PostgresqlStateRepository(jdbi);
+                return new SqlServerDatabaseRepository(jdbi);
+            case "postgresql":
+                return new PostgresqlStateDatabaseRepository(jdbi);
         }
+
+        throw new RuntimeException("Database not supported");
     }
 }

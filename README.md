@@ -15,7 +15,6 @@ The available configuration settings for the application are:
 * **DATABASE_URL:** A JDBC connection string that points to where data should be stored, e.g. `jdbc:postgresql://localhost/flow`
 * **DATABASE_USERNAME** The username to use when connecting to the database
 * **DATABASE_PASSWORD** The password to use when connecting to the database
-* **DATABASE_TYPE** The database type, postgresql, sqlserver and mysql are currently supported
 * **RECEIVER_KEY** You can get this value from the Boomi Flow platform
 * **PLATFORM_KEY** You can get this value from the Boomi Flow platform
 
@@ -35,7 +34,6 @@ application from the command line:
 $ DATABASE_URL=jdbc:postgresql://localhost/flow \
 DATABASE_USERNAME=manywho \
 DATABASE_PASSWORD=password \
-DATABASE_TYPE=type \
 RECEIVER_KEY=receiverkey \
 PLATFORM_KEY=platformkey \
 java -jar target/external-storage.jar
