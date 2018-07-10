@@ -4,8 +4,6 @@ import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwx.JsonWebStructure;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
-import org.jose4j.lang.JoseException;
-import org.jose4j.lang.UnresolvableKeyException;
 
 import javax.inject.Inject;
 import java.security.Key;
@@ -21,20 +19,17 @@ public class PlatformKeyResolver implements VerificationKeyResolver {
     }
 
     @Override
-    public Key resolveKey(JsonWebSignature jws, List<JsonWebStructure> nestingContext) throws UnresolvableKeyException {
-        var key = keyRepository.findPlatformKey(UUID.fromString(jws.getKeyIdHeaderValue()));
-        if (key == null) {
-            throw new UnresolvableKeyException("Unable to resolve a platform key with the ID " + jws.getKeyIdHeaderValue());
-        }
-
-        return key.getPublicKey();
+    public Key resolveKey(JsonWebSignature jws, List<JsonWebStructure> nestingContext) {
+        return resolveKey(UUID.fromString(jws.getKeyIdHeaderValue()))
+                .getPublicKey();
     }
 
-    public PublicJsonWebKey resolveKeyFromPublicKey(String publicJwk) {
-        try {
-            return PublicJsonWebKey.Factory.newPublicJwk(publicJwk);
-        } catch (JoseException e) {
-            throw new RuntimeException("Unable to create a JWK instance from the public platform key", e);
+    public PublicJsonWebKey resolveKey(UUID id) {
+        var key = keyRepository.findPlatformKey(id);
+        if (key == null) {
+            throw new RuntimeException("Unable to resolve a platform key with the ID " + id);
         }
+
+        return key;
     }
 }

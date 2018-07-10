@@ -15,8 +15,8 @@ import java.io.IOException;
 public class RequestValidationFilter implements ContainerRequestFilter {
     private final static Logger LOGGER = LoggerFactory.getLogger(RequestValidationFilter.class);
 
-    private final static String HEADER_PLATFORM_KEY = "X-ManyWho-Platform-Key";
-    private final static String HEADER_RECEIVER_KEY = "X-ManyWho-Receiver-Key";
+    private final static String HEADER_PLATFORM_KEY = "X-ManyWho-Platform-Key-ID";
+    private final static String HEADER_RECEIVER_KEY = "X-ManyWho-Receiver-Key-ID";
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {

@@ -44,12 +44,12 @@ public class StateManager {
         // TODO
     }
 
-    public StateResponse findState(UUID tenant, UUID id, String publicPlatformKey, String publicReceiverKey) {
+    public StateResponse findState(UUID tenant, UUID id, UUID publicPlatformKey, UUID publicReceiverKey) {
         var state = repository.find(tenant, id)
                 .orElseThrow(NotFoundException::new);
 
-        var platformKey = platformKeyResolver.resolveKeyFromPublicKey(publicPlatformKey);
-        var receiverKey = receiverKeyResolver.resolveKeyFromPublicKey(publicReceiverKey);
+        var platformKey = platformKeyResolver.resolveKey(publicPlatformKey);
+        var receiverKey = receiverKeyResolver.resolveKey(publicReceiverKey);
 
         // Create the claims, which will be the content of the JWT
         JwtClaims claims = new JwtClaims();
