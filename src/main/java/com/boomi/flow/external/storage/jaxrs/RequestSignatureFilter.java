@@ -17,14 +17,12 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
+import static org.jose4j.jwa.AlgorithmConstraints.ConstraintType.WHITELIST;
 import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384;
 
 @Provider
 public class RequestSignatureFilter implements ContainerRequestFilter {
     private final static Logger LOGGER = LoggerFactory.getLogger(RequestSignatureFilter.class);
-
-    private final static String HEADER_SIGNATURE = "X-ManyWho-Signature";
-    private final static String HEADER_TENANT = "X-ManyWho-Tenant";
 
     private final PlatformKeyResolver platformKeyResolver;
 
@@ -35,58 +33,39 @@ public class RequestSignatureFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext context) {
-        // If we're not given the tenant ID header, then we reject the call
-        if (context.getHeaders().containsKey(HEADER_TENANT) == false) {
-            LOGGER.warn("Rejecting request because no {} header was provided", HEADER_TENANT);
-
-            context.abortWith(Response.status(401).build());
-            return;
-        }
-
         // If we're not given a tenant ID, then we reject the call
-        var tenant = context.getHeaderString(HEADER_TENANT);
+        var tenant = context.getUriInfo().getPathParameters().getFirst("tenant");
         if (Strings.isNullOrEmpty(tenant)) {
-            LOGGER.warn("Rejecting request because an empty {} header was provided", HEADER_TENANT);
-
-            context.abortWith(Response.status(401).build());
-            return;
-        }
-
-        // If we're not given the signature header, then we reject the call
-        if (context.getHeaders().containsKey(HEADER_SIGNATURE) == false) {
-            LOGGER.warn("Rejecting request because no {} header was provided", HEADER_SIGNATURE);
+            LOGGER.warn("Rejecting request because no tenant ID could be determined");
 
             context.abortWith(Response.status(401).build());
             return;
         }
 
         // If we're not given a signature, then we reject the call
-        var signature = context.getHeaderString(HEADER_SIGNATURE);
+        var signature = context.getHeaderString("X-ManyWho-Signature");
         if (Strings.isNullOrEmpty(signature)) {
-            LOGGER.warn("Rejecting request because an empty {} header was provided", HEADER_SIGNATURE);
+            LOGGER.warn("Rejecting request because no signature header was provided");
 
             context.abortWith(Response.status(401).build());
             return;
         }
 
-        // Create constraints for the algorithms that incoming tokens need to use, otherwise decoding will fail
-        var jwsAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ECDSA_USING_P384_CURVE_AND_SHA384);
-
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setRequireExpirationTime()
-                .setMaxFutureValidityInMinutes(300)
+                .setMaxFutureValidityInMinutes(5)
                 .setRequireSubject()
                 .setExpectedIssuer("manywho")
                 .setExpectedAudience(tenant)
                 .setVerificationKeyResolver(platformKeyResolver)
-                .setJwsAlgorithmConstraints(jwsAlgorithmConstraints)
+                .setJwsAlgorithmConstraints(new AlgorithmConstraints(WHITELIST, ECDSA_USING_P384_CURVE_AND_SHA384))
                 .build();
 
         JwtClaims claims;
         try {
             claims = jwtConsumer.processToClaims(signature);
         } catch (InvalidJwtException e) {
-            LOGGER.error("Rejecting request because an invalid JWT was given in the {} header", HEADER_SIGNATURE, e);
+            LOGGER.error("Rejecting request because an invalid JWT was given in the signature header", e);
 
             context.abortWith(Response.status(401).build());
             return;

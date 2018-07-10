@@ -29,8 +29,13 @@ public class StateController {
      */
     @GET
     @Path("/{tenant}/{id}")
-    public StateResponse findState(@PathParam("tenant") UUID tenant, @PathParam("id") UUID id) {
-        return manager.findState(tenant, id);
+    public StateResponse findState(
+            @PathParam("tenant") UUID tenant,
+            @PathParam("id") UUID id,
+            @HeaderParam("X-ManyWho-Platform-Key") String publicPlatformKey,
+            @HeaderParam("X-ManyWho-Receiver-Key") String publicReceiverKey
+    ) {
+        return manager.findState(tenant, id, publicPlatformKey, publicReceiverKey);
     }
 
     /**

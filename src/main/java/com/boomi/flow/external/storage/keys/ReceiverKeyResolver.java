@@ -1,10 +1,12 @@
 package com.boomi.flow.external.storage.keys;
 
 import org.jose4j.jwe.JsonWebEncryption;
+import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwx.JsonWebStructure;
 import org.jose4j.keys.resolvers.DecryptionKeyResolver;
 import org.jose4j.keys.resolvers.VerificationKeyResolver;
+import org.jose4j.lang.JoseException;
 import org.jose4j.lang.UnresolvableKeyException;
 
 import javax.inject.Inject;
@@ -22,20 +24,33 @@ public class ReceiverKeyResolver implements DecryptionKeyResolver, VerificationK
 
     @Override
     public Key resolveKey(JsonWebEncryption jwe, List<JsonWebStructure> nestingContext) throws UnresolvableKeyException {
-        return resolveKey(jwe.getKeyIdHeaderValue());
+        return resolveKey(jwe.getKeyIdHeaderValue())
+                .getPrivateKey();
     }
 
     @Override
     public Key resolveKey(JsonWebSignature jws, List<JsonWebStructure> nestingContext) throws UnresolvableKeyException {
-        return resolveKey(jws.getKeyIdHeaderValue());
+        return resolveKey(jws.getKeyIdHeaderValue())
+                .getPublicKey();
     }
 
-    private Key resolveKey(String id) throws UnresolvableKeyException {
+    public PublicJsonWebKey resolveKeyFromPublicKey(String publicJwk) {
+        PublicJsonWebKey publicKey;
+        try {
+            publicKey = PublicJsonWebKey.Factory.newPublicJwk(publicJwk);
+        } catch (JoseException e) {
+            throw new RuntimeException("Unable to create a JWK instance from the public receiver key", e);
+        }
+
+        return keyRepository.findReceiverKey(UUID.fromString(publicKey.getKeyId()));
+    }
+
+    private PublicJsonWebKey resolveKey(String id) throws UnresolvableKeyException {
         var key = keyRepository.findReceiverKey(UUID.fromString(id));
         if (key == null) {
             throw new UnresolvableKeyException("Unable to resolve a receiver key with the ID " + id);
         }
 
-        return key.getKey();
+        return key;
     }
 }

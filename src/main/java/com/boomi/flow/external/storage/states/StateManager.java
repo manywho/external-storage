@@ -1,21 +1,18 @@
 package com.boomi.flow.external.storage.states;
 
-import com.boomi.flow.external.storage.utils.Environment;
+import com.boomi.flow.external.storage.keys.PlatformKeyResolver;
+import com.boomi.flow.external.storage.keys.ReceiverKeyResolver;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
-import org.jose4j.jwk.JsonWebKeySet;
-import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
-import org.jose4j.keys.resolvers.JwksDecryptionKeyResolver;
-import org.jose4j.keys.resolvers.JwksVerificationKeyResolver;
 import org.jose4j.lang.JoseException;
 
 import javax.inject.Inject;
@@ -25,41 +22,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.*;
-import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.*;
+import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_192_CBC_HMAC_SHA_384;
+import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
+import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW;
+import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW;
 import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384;
 
 public class StateManager {
     private final StateRepository repository;
+    private final PlatformKeyResolver platformKeyResolver;
+    private final ReceiverKeyResolver receiverKeyResolver;
 
     @Inject
-    public StateManager(StateRepository repository) {
+    public StateManager(StateRepository repository, PlatformKeyResolver platformKeyResolver, ReceiverKeyResolver receiverKeyResolver) {
         this.repository = repository;
+        this.platformKeyResolver = platformKeyResolver;
+        this.receiverKeyResolver = receiverKeyResolver;
     }
 
     public void deleteStates(UUID tenant, List<UUID> ids) {
         // TODO
     }
 
-    public StateResponse findState(UUID tenant, UUID id) {
+    public StateResponse findState(UUID tenant, UUID id, String publicPlatformKey, String publicReceiverKey) {
         var state = repository.find(tenant, id)
                 .orElseThrow(NotFoundException::new);
 
-        PublicJsonWebKey receiverKey;
-        try {
-            // For now use a placeholder, but this would be a store-specific private key, used to decrypt incoming tokens
-            receiverKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("RECEIVER_KEY"));
-        } catch (JoseException e) {
-            throw new RuntimeException("Unable to create a JWK instance from the receiver key", e);
-        }
-
-        PublicJsonWebKey platformKey;
-        try {
-            // For now use a placeholder key, but this would be a public key from the platform, used to verify the integrity of any tokens
-            platformKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("PLATFORM_KEY"));
-        } catch (JoseException e) {
-            throw new RuntimeException("Unable to create a JWK instance from the platform key", e);
-        }
+        var platformKey = platformKeyResolver.resolveKeyFromPublicKey(publicPlatformKey);
+        var receiverKey = receiverKeyResolver.resolveKeyFromPublicKey(publicReceiverKey);
 
         // Create the claims, which will be the content of the JWT
         JwtClaims claims = new JwtClaims();
@@ -76,17 +66,16 @@ public class StateManager {
 
         // Create the signature for the actual content
         JsonWebSignature jws = new JsonWebSignature();
-        jws.setAlgorithmHeaderValue(ECDSA_USING_P384_CURVE_AND_SHA384); // TODO: Check this
+        jws.setAlgorithmHeaderValue(ECDSA_USING_P384_CURVE_AND_SHA384);
         jws.setKey(receiverKey.getPrivateKey());
-        jws.setKeyIdHeaderValue("24c6a8e2-fb67-412d-8adb-9cfdf286af44");
+        jws.setKeyIdHeaderValue(receiverKey.getKeyId());
         jws.setPayload(claims.toJson());
 
         String signature;
         try {
             signature = jws.getCompactSerialization();
         } catch (JoseException e) {
-            // TODO: Do something...
-            throw new RuntimeException(e);
+            throw new RuntimeException("There was a problem signing the claims", e);
         }
 
         // The outer shell
@@ -102,49 +91,24 @@ public class StateManager {
         try {
             return new StateResponse(jwe.getCompactSerialization());
         } catch (JoseException e) {
-            // TODO: Do something...
-            throw new RuntimeException(e);
+            throw new RuntimeException("There was a problem encrypting the JWT", e);
         }
     }
 
     public void saveStates(UUID tenant, List<StateRequest> stateRequests) {
-        PublicJsonWebKey receiverKey;
-        JsonWebKeySet jsonWebKeySetReceiverKey;
-        try {
-            // For now use a placeholder, but this would be a store-specific private key, used to decrypt incoming tokens
-            receiverKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("RECEIVER_KEY"));
-            jsonWebKeySetReceiverKey = new JsonWebKeySet(receiverKey);
-        } catch (JoseException e) {
-            throw new RuntimeException("Unable to create a JWK instance from the receiver key", e);
-        }
-
-        PublicJsonWebKey platformKey;
-        JsonWebKeySet jsonWebKeySetPlatform;
-        try {
-            // For now use a placeholder key, but this would be a public key from the platform, used to verify the integrity of any tokens
-            platformKey = PublicJsonWebKey.Factory.newPublicJwk(Environment.get("PLATFORM_KEY"));
-            jsonWebKeySetPlatform = new JsonWebKeySet(platformKey);
-        } catch (JoseException e) {
-            throw new RuntimeException("Unable to create a JWK instance from the platform key", e);
-        }
-
         // Create constraints for the algorithms that incoming tokens need to use, otherwise decoding will fail
         var jwsAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, ECDSA_USING_P384_CURVE_AND_SHA384);
         var jweAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, ECDH_ES_A192KW, ECDH_ES_A256KW);
         var jceAlgorithmConstraints = new AlgorithmConstraints(ConstraintType.WHITELIST, AES_192_CBC_HMAC_SHA_384, AES_256_CBC_HMAC_SHA_512);
-
-        JwksDecryptionKeyResolver jwksDecryptionKeyResolverReceiver = new JwksDecryptionKeyResolver(jsonWebKeySetReceiverKey.getJsonWebKeys());
-        JwksVerificationKeyResolver jwksVerificationKeyResolverPlatform = new JwksVerificationKeyResolver(jsonWebKeySetPlatform.getJsonWebKeys());
-
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setRequireExpirationTime()
                 .setMaxFutureValidityInMinutes(300)
                 .setRequireSubject()
                 .setExpectedIssuer("manywho")
-                .setExpectedAudience("receiver") // TODO: Change this to the store ID
-                .setDecryptionKeyResolver(jwksDecryptionKeyResolverReceiver)
-                .setVerificationKeyResolver(jwksVerificationKeyResolverPlatform)
+                .setExpectedAudience(tenant.toString())
+                .setDecryptionKeyResolver(receiverKeyResolver)
+                .setVerificationKeyResolver(platformKeyResolver)
                 .setJwsAlgorithmConstraints(jwsAlgorithmConstraints)
                 .setJweAlgorithmConstraints(jweAlgorithmConstraints)
                 .setJweContentEncryptionAlgorithmConstraints(jceAlgorithmConstraints)
