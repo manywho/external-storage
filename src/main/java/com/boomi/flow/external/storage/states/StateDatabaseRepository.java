@@ -4,6 +4,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,33 @@ public abstract class StateDatabaseRepository implements StateRepository {
 
     public StateDatabaseRepository(Jdbi jdbi) {
         this.jdbi = jdbi;
+    }
+
+    @Override
+    public void delete(UUID tenant, List<UUID> ids) {
+        jdbi.withHandle(handle -> {
+            var batch = handle.prepareBatch("DELETE FROM states WHERE id = :id AND tenant_id = :tenant");
+
+            for (UUID id : ids) {
+                LOGGER.info("Deleting state with the ID {} from the tenant {}", id, tenant);
+
+                batch.bind("id", id)
+                        .bind("tenant", tenant)
+                        .add();
+            }
+
+            return batch.execute();
+        });
+    }
+
+    public Optional<String> find(UUID tenant, UUID id) {
+        LOGGER.info("Loading state with the ID {} from the tenant {}", id, tenant);
+
+        return jdbi.withHandle(handle -> handle.createQuery("SELECT content FROM states WHERE id = :id AND tenant_id = :tenant")
+                .bind("id", id)
+                .bind("tenant", tenant)
+                .mapTo(String.class)
+                .findFirst());
     }
 
     public void save(UUID tenant, List<State> states) {
@@ -35,14 +63,4 @@ public abstract class StateDatabaseRepository implements StateRepository {
     protected abstract void addStateToBatch(PreparedBatch batch, State state);
 
     protected abstract String upsertQuery();
-
-    public Optional<String> find(UUID tenant, UUID id) {
-        LOGGER.info("Loading state with the ID {} from the tenant {}", id, tenant);
-
-        return jdbi.withHandle(handle -> handle.createQuery("SELECT content FROM states WHERE id = :id AND tenant_id = :tenant")
-                .bind("id", id)
-                .bind("tenant", tenant)
-                .mapTo(String.class)
-                .findFirst());
-    }
 }

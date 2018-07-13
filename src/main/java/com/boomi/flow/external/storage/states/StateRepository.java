@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StateRepository {
-    void save(UUID tenant, List<State> states);
+    void delete(UUID tenant, List<UUID> ids);
     Optional<String> find(UUID tenant, UUID id);
+    void save(UUID tenant, List<State> states);
 }

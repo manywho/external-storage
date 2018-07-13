@@ -41,7 +41,7 @@ public class StateManager {
     }
 
     public void deleteStates(UUID tenant, List<UUID> ids) {
-        // TODO
+        repository.delete(tenant, ids);
     }
 
     public StateResponse findState(UUID tenant, UUID id, UUID platformKeyJwk, UUID receiverKeyJwk) {
