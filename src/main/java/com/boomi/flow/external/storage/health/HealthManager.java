@@ -14,7 +14,7 @@ public class HealthManager {
     }
 
     public Response healthCheck() {
-        var result = jdbi.withHandle(handle -> handle.createQuery("SELECT TRUE")
+        var result = jdbi.withHandle(handle -> handle.createQuery("SELECT 1")
                 .mapTo(boolean.class)
                 .findOnly());
 
