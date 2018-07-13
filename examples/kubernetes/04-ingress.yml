@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: external-storage
+  namespace: boomi-flow
+  annotations:
+    ingress.kubernetes.io/proxy-body-size: 200m
+spec:
+  rules:
+  - host: "boomiflow.yourdomain.com"
+    http:
+      paths:
+      - path: /api/storage/1
+        backend:
+          serviceName: external-storage-service
+          servicePort: 8080

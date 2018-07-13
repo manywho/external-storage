@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: external-storage-service
+  namespace: boomi-flow
+data:
+  DATABASE_URL: jdbc:postgresql://external-storage-database/external_storage
+  DATABASE_USERNAME: external_storage
+  DATABASE_PASSWORD: password
+  PLATFORM_KEY: "{{ insert your platform key here }}"
+  RECEIVER_KEY: "{{ insert your receiver key here }}"

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: external-storage-database
+  namespace: boomi-flow
+  labels:
+    app: external-storage-database
+spec:
+  serviceName: external-storage-database
+  replicas: 1
+  selector:
+    matchLabels:
+      app: external-storage-database
+  template:
+    metadata:
+      labels:
+        app: external-storage-database
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:alpine
+        env:
+        - name: POSTGRES_DB
+          value: external_storage
+        - name: POSTGRES_USER
+          value: external_storage
+        - name: POSTGRES_PASSWORD
+          value: password
+        ports:
+        - name: postgresql
+          containerPort: 5432
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 25Gi
