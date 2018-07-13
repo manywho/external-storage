@@ -1,5 +1,7 @@
 package com.boomi.flow.external.storage.states;
 
+import com.boomi.flow.external.storage.common.CommonParameters;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -19,42 +21,48 @@ public class StateController {
     }
 
     /**
-     * Find a state, using its own ID and a tenant ID. If the state exists, this method will return the original signed
-     * JWT representation that was sent by the Boomi Flow platform, to ensure the integrity of the state data.
+     * Find a state, using its own ID and a tenant ID. If the state exists, this method will retrieve it, create a JWT
+     * representation of it, sign that JWT, then encrypt the whole message, to ensure the integrity of the state data.
      *
-     * @param tenant The ID of the tenant the state is from
-     * @param id     The ID of the state to find
-     * @return the original JWT representation of the state, if one was found
+     * @param commonParameters A bunch of various parameters from the request, including tenant ID
+     * @param id               The ID of the state to find
+     * @return a signed and encrypted token of the state, if one was found
      * @throws NotFoundException if no state was found
      */
     @GET
     @Path("/{tenant}/{id}")
-    public StateResponse findState(
-            @PathParam("tenant") UUID tenant,
-            @PathParam("id") UUID id,
-            @HeaderParam("X-ManyWho-Platform-Key-ID") UUID publicPlatformKey,
-            @HeaderParam("X-ManyWho-Receiver-Key-ID") UUID publicReceiverKey
-    ) {
-        return manager.findState(tenant, id, publicPlatformKey, publicReceiverKey);
+    public StateResponse findState(@BeanParam CommonParameters commonParameters, @PathParam("id") UUID id) {
+        return manager.findState(
+                commonParameters.getTenant(),
+                id,
+                commonParameters.getPublicPlatformKey(),
+                commonParameters.getPublicReceiverKey()
+        );
     }
 
     /**
      * Save one or more states, and link them to the given tenant. As of v1 of the API, this method will only receive
      * one state at a time, but future versions may send in more than one state at a time.
      *
-     * @param tenant The ID of the tenant the states are from
-     * @param states A list of one or more states, including various metadata fields and a JWE-encrypted, signed, JWT
-     *               representation
+     * @param commonParameters A bunch of various parameters from the request, including tenant ID
+     * @param states           A list of one or more states, including various metadata fields and a JWE-encrypted,
+     *                         signed, JWT representation
      */
     @POST
     @Path("/{tenant}")
-    public void saveStates(@PathParam("tenant") UUID tenant, @Valid List<StateRequest> states) {
-        manager.saveStates(tenant, states);
+    public void saveStates(@BeanParam CommonParameters commonParameters, @Valid List<StateRequest> states) {
+        manager.saveStates(commonParameters.getTenant(), states);
     }
 
+    /**
+     * Delete one or more states from the given tenant.
+     *
+     * @param commonParameters A bunch of various parameters from the request, including tenant ID
+     * @param ids              An array of IDs of the states to delete
+     */
     @DELETE
     @Path("/{tenant}")
-    public void deleteStates(@PathParam("tenant") UUID tenant, @Valid List<UUID> ids) {
-        manager.deleteStates(tenant, ids);
+    public void deleteStates(@BeanParam CommonParameters commonParameters, @Valid List<UUID> ids) {
+        manager.deleteStates(commonParameters.getTenant(), ids);
     }
 }
