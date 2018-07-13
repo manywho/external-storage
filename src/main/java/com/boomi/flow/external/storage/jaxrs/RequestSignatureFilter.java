@@ -33,6 +33,11 @@ public class RequestSignatureFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext context) {
+        // We don't want to run this on the health check endpoint
+        if (context.getUriInfo().getPath().equals("/health")) {
+            return;
+        }
+
         // If we're not given a tenant ID, then we reject the call
         var tenant = context.getUriInfo().getPathParameters().getFirst("tenant");
         if (Strings.isNullOrEmpty(tenant)) {

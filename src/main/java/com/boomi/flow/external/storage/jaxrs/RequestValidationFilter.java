@@ -19,23 +19,28 @@ public class RequestValidationFilter implements ContainerRequestFilter {
     private final static String HEADER_RECEIVER_KEY = "X-ManyWho-Receiver-Key-ID";
 
     @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
-        var platformKeyHeader = requestContext.getHeaderString(HEADER_PLATFORM_KEY);
+    public void filter(ContainerRequestContext context) throws IOException {
+        // We don't want to run this on the health check endpoint
+        if (context.getUriInfo().getPath().equals("/health")) {
+            return;
+        }
+
+        var platformKeyHeader = context.getHeaderString(HEADER_PLATFORM_KEY);
         if (Strings.isNullOrEmpty(platformKeyHeader)) {
             LOGGER.error("No value for the {} header was given", HEADER_PLATFORM_KEY);
 
-            requestContext.abortWith(Response.status(400)
-                    .entity(createServiceProblem(requestContext, "No " + HEADER_PLATFORM_KEY + " header was given"))
+            context.abortWith(Response.status(400)
+                    .entity(createServiceProblem(context, "No " + HEADER_PLATFORM_KEY + " header was given"))
                     .build());
             return;
         }
 
-        var receiverKeyHeader = requestContext.getHeaderString(HEADER_RECEIVER_KEY);
+        var receiverKeyHeader = context.getHeaderString(HEADER_RECEIVER_KEY);
         if (Strings.isNullOrEmpty(receiverKeyHeader)) {
             LOGGER.error("No value for the {} header was given", HEADER_RECEIVER_KEY);
 
-            requestContext.abortWith(Response.status(400)
-                    .entity(createServiceProblem(requestContext, "No " + HEADER_RECEIVER_KEY + " header was given"))
+            context.abortWith(Response.status(400)
+                    .entity(createServiceProblem(context, "No " + HEADER_RECEIVER_KEY + " header was given"))
                     .build());
             return;
         }
