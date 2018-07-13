@@ -1,5 +1,6 @@
 package com.boomi.flow.external.storage.state;
 
+import com.boomi.flow.external.storage.guice.HikariDataSourceProvider;
 import com.boomi.flow.external.storage.guice.JdbiProvider;
 import com.boomi.flow.external.storage.Migrator;
 import com.boomi.flow.external.storage.BaseTest;
@@ -79,7 +80,7 @@ public class StateControllerTest extends BaseTest {
 
         Assert.assertEquals(204, response.getStatus());
 
-        var jdbi = new JdbiProvider().get();
+        var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
 

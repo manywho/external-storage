@@ -6,7 +6,6 @@ import com.manywho.sdk.services.servers.undertow.UndertowServer;
 
 public class Application {
     public static void main(String[] args) throws Exception {
-
         Migrator.executeMigrations();
 
         EmbeddedServer server = new UndertowServer();
