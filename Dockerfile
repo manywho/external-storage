@@ -3,7 +3,7 @@ WORKDIR /usr/src/app
 COPY pom.xml pom.xml
 RUN mvn dependency:resolve
 COPY src src
-RUN mvn clean package
+RUN mvn clean package -DskipTests=true
 
 FROM openjdk:10-jre-slim
 EXPOSE 8080
