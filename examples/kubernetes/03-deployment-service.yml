@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: external-storage-service
+  namespace: boomi-flow
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 3
+  selector:
+    matchLabels:
+      app: external-storage-service
+  template:
+    metadata:
+      labels:
+        app: external-storage-service
+    spec:
+      # Attempt to not schedule on a node where the service is already running
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: name
+                  operator: In
+                  values:
+                  - external-storage-service
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: service
+        image: quay.io/manywho/external-storage # Note: Change this to a specific tag, unless you want the latest development version!
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: 8080
+        envFrom:
+          - configMapRef:
+              name: external-storage-service
+        livenessProbe:
+          httpGet:
+            path: /api/storage/1/health
+            port: http
+          initialDelaySeconds: 5
+          timeoutSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/storage/1/health
+            port: http
+          initialDelaySeconds: 10
+          timeoutSeconds: 10

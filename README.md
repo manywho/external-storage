@@ -8,6 +8,15 @@ for consumers of the API, so you can run it as-is, or customize it to fit your r
 
 ## Usage
 
+Various example deployment strategies are provided in the [`examples`](examples) folder, and support the following, in
+a test environment:
+
+* Kubernetes
+* systemd
+
+The following instructions document how to run the service manually, and can be used to base your own deployment strategies
+from, if they don't fit into the example ones we provide.
+
 ### Configuring
 
 The available configuration settings for the application are:
@@ -76,7 +85,6 @@ Contributions are welcome to the project - whether they are feature requests, im
 
 ## Roadmap
 
-* Example deployments, e.g. Heroku, Kubernetes, systemd
 * Tests, including Heroku
 
 ## License

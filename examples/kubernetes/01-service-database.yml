@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-storage-database
+  namespace: boomi-flow
+  labels:
+    app: external-storage-database
+spec:
+  ports:
+  - name: postgresql
+    port: 5432
+  selector:
+    app: external-storage-database
