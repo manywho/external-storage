@@ -10,18 +10,6 @@
     "storage"
   ],
   "env": {
-    "DATABASE_URL": {
-      "description": "A JDBC connection string that points to where data should be stored",
-      "required": true
-    },
-    "DATABASE_USERNAME": {
-      "description": "The username to use when connecting to the database",
-      "required": true
-    },
-    "DATABASE_PASSWORD": {
-      "description": "The password to use when connecting to the database",
-      "required": true
-    },
     "RECEIVER_KEY": {
       "description": "You can get this value from the Boomi Flow platform",
       "required": true
@@ -30,5 +18,13 @@
       "description": "You can get this value from the Boomi Flow platform",
       "required": true
     }
-  }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql",
+      "options": {
+        "version": "10"
+      }
+    }
+  ]
 }
