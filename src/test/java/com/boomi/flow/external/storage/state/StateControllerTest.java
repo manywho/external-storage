@@ -1,8 +1,8 @@
-package com.boomi.flow.external.storage.states.state;
+package com.boomi.flow.external.storage.state;
 
 import com.boomi.flow.external.storage.guice.JdbiProvider;
 import com.boomi.flow.external.storage.Migrator;
-import com.boomi.flow.external.storage.states.BaseTest;
+import com.boomi.flow.external.storage.BaseTest;
 import com.boomi.flow.external.storage.states.State;
 import com.google.common.io.Resources;
 import org.jboss.resteasy.mock.MockHttpRequest;
@@ -17,7 +17,6 @@ import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import javax.ws.rs.core.MediaType;
@@ -32,7 +31,6 @@ import java.util.UUID;
 public class StateControllerTest extends BaseTest {
 
     @Test
-    @Ignore
     public void testSaveStates() throws URISyntaxException, IOException, JoseException, JSONException {
 
         String content = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/valid-state.json").toURI())));

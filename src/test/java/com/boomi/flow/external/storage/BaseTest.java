@@ -1,4 +1,4 @@
-package com.boomi.flow.external.storage.states;
+package com.boomi.flow.external.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manywho.sdk.api.jackson.ObjectMapperFactory;

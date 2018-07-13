@@ -1,6 +1,5 @@
-package com.boomi.flow.external.storage.states;
+package com.boomi.flow.external.storage;
 
-import com.boomi.flow.external.storage.ApplicationModule;
 import com.manywho.sdk.services.servers.Servlet3Server;
 
 public class ApplicationTest extends Servlet3Server {
