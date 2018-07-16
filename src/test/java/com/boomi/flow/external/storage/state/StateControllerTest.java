@@ -17,7 +17,9 @@ import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import javax.ws.rs.core.MediaType;
@@ -104,6 +106,14 @@ public class StateControllerTest extends BaseTest {
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(),false);
 
+
+    }
+
+    @AfterClass
+    public static void deleteStates() {
+        UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
+        UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
+        var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
         String sqlDelete = "DELETE FROM states WHERE id=:id AND tenant_id=:tenant";
         jdbi.withHandle(handle -> handle.createUpdate(sqlDelete)
                 .bind("id", stateId)

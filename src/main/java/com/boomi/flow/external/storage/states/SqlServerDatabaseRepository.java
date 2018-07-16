@@ -2,12 +2,29 @@ package com.boomi.flow.external.storage.states;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
+import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
+import java.util.List;
+import java.util.UUID;
 
 public class SqlServerDatabaseRepository extends StateDatabaseRepository {
+    private Jdbi jdbi;
 
     public SqlServerDatabaseRepository(Jdbi jdbi)
     {
         super(jdbi);
+        this.jdbi = jdbi;
+    }
+
+    @Override
+    public void save(UUID tenant, List<State> states) {
+        jdbi.withHandle(handle -> {
+            var batch = handle.prepareBatch(upsertQuery());
+            for (State state: states) {
+                handle.useTransaction(TransactionIsolationLevel.SERIALIZABLE, handle1 -> addStateToBatch(batch, state));
+            }
+
+            return batch.execute();
+        });
     }
 
     @Override
@@ -21,18 +38,17 @@ public class SqlServerDatabaseRepository extends StateDatabaseRepository {
                 .bind("currentMapElement", state.getCurrentMapElementId())
                 .bind("currentUser", state.getCurrentUserId())
                 .bind("content", state.getContent())
-                .bind("createdAt", state.getCreatedAt())
-                .bind("updatedAt", state.getUpdatedAt())
+                .bind("createdAt", state.getCreatedAt().toString())
+                .bind("updatedAt", state.getUpdatedAt().toString())
                 .add();
     }
 
     @Override
     protected String upsertQuery() {
-        return "MERGE states as Target " +
-                "USING states as Source ON Target.id = Source.id AND Source.id = :id " +
-                "WHEN MATCHED AND Target.updated_at <= :updatedAt THEN " +
-                    "UPDATE  SET flow_id =:flow, flow_version_id =:flowVersion, is_done =:isDone, current_map_element_id=:currentMapElement, current_user_id=:currentUser, updated_at =:updatedAt, content=:content " +
-                "WHEN NOT MATCHED THEN " +
-                    "INSERT (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES (:id, :tenant, :parent, :flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :createdAt, :updatedAt, :content);";
+        return ("IF EXISTS ( SELECT * FROM states WITH (UPDLOCK) WHERE id = :id ) " +
+                "        UPDATE states SET flow_id =:flow, flow_version_id =:flowVersion, is_done =:isDone, current_map_element_id=:currentMapElement, current_user_id = :currentUser, updated_at =:updatedAt, content=:content " +
+                "    ELSE " +
+                "        INSERT states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES (:id, :tenant, :parent, :flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :createdAt, :updatedAt, :content)");
+
     }
 }
