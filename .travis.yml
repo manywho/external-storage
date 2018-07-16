@@ -1,7 +1,10 @@
 language: java
 jdk:
-  - oraclejdk10
-  - openjdk10
+- oraclejdk10
+- openjdk10
+env:
+  matrix:
+    - DATABASE_USERNAME=$DATABASE_USERNAME
 cache:
   directories:
-    - $HOME/.m2
+    - "$HOME/.m2"
