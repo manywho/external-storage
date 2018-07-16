@@ -1,10 +1,10 @@
 package com.boomi.flow.external.storage.states;
 
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +21,7 @@ public abstract class StateDatabaseRepository implements StateRepository {
     @Override
     public void delete(UUID tenant, List<UUID> ids) {
         jdbi.withHandle(handle -> {
+            addCustomArgument(handle);
             var batch = handle.prepareBatch("DELETE FROM states WHERE id = :id AND tenant_id = :tenant");
 
             for (UUID id : ids) {
@@ -38,17 +39,23 @@ public abstract class StateDatabaseRepository implements StateRepository {
     public Optional<String> find(UUID tenant, UUID id) {
         LOGGER.info("Loading state with the ID {} from the tenant {}", id, tenant);
 
-        return jdbi.withHandle(handle -> handle.createQuery("SELECT content FROM states WHERE id = :id AND tenant_id = :tenant")
-                .bind("id", id)
-                .bind("tenant", tenant)
-                .mapTo(String.class)
-                .findFirst());
+        return jdbi.withHandle(handle -> {
+            addCustomArgument(handle);
+
+            return handle.createQuery("SELECT content FROM states WHERE id = :id AND tenant_id = :tenant")
+                    .bind("id", id)
+                    .bind("tenant", tenant)
+                    .mapTo(String.class)
+                    .findFirst();
+        });
     }
 
     public void save(UUID tenant, List<State> states) {
         jdbi.withHandle(handle -> {
+            addCustomArgument(handle);
             // Insert a new state, or update an existing one if one exists and the one we have is newer
             var batch = handle.prepareBatch(upsertQuery());
+
 
             for (State state : states) {
                 LOGGER.info("Saving a state with the ID {} in the tenant {}", state.getId(), tenant);
@@ -59,6 +66,8 @@ public abstract class StateDatabaseRepository implements StateRepository {
             return batch.execute();
         });
     }
+
+    protected void addCustomArgument(Handle handle) {}
 
     protected abstract void addStateToBatch(PreparedBatch batch, State state);
 

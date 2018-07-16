@@ -1,9 +1,10 @@
 package com.boomi.flow.external.storage.states;
 
+import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
+import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import java.time.ZoneOffset;
-import java.util.UUID;
 
 public class MySqlStateDatabaseRepository extends StateDatabaseRepository {
 
@@ -13,30 +14,23 @@ public class MySqlStateDatabaseRepository extends StateDatabaseRepository {
 
     @Override
     protected void addStateToBatch(PreparedBatch batch, State state) {
-        batch.bind("id", convertUuidToString(state.getId()))
-                .bind("tenant", convertUuidToString(state.getTenantId()))
-                .bind("parent", convertUuidToString(state.getParentId()))
-                .bind("flow", convertUuidToString(state.getFlowId()))
-                .bind("flowVersion", convertUuidToString(state.getFlowVersionId()))
-                .bind("isDone", convertBoolean(state.isDone()))
-                .bind("currentMapElement", convertUuidToString(state.getCurrentMapElementId()))
-                .bind("currentUser", convertUuidToString(state.getCurrentUserId()))
+        batch.bind("id", state.getId())
+                .bind("tenant", state.getTenantId())
+                .bind("parent", state.getParentId())
+                .bind("flow", state.getFlowId())
+                .bind("flowVersion", state.getFlowVersionId())
+                .bind("isDone", state.isDone())
+                .bind("currentMapElement", state.getCurrentMapElementId())
+                .bind("currentUser", state.getCurrentUserId())
                 .bind("content", state.getContent())
                 .bind("createdAt", state.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC))
                 .bind("updatedAt", state.getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC))
                 .add();
     }
 
-    private Integer convertBoolean(boolean value) {
-        return (value == true)? 1: 0;
-    }
-
-    private String convertUuidToString(UUID uuid) {
-        if (uuid != null) {
-            return uuid.toString();
-        }
-
-        return null;
+    @Override
+    protected void addCustomArgument(Handle handle) {
+        handle.registerArgument(new UuidArgumentFactory());
     }
 
     @Override
