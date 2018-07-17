@@ -5,16 +5,14 @@ import com.manywho.sdk.api.jackson.ObjectMapperFactory;
 import com.manywho.sdk.services.jaxrs.resolvers.ObjectMapperContextResolver;
 import org.jboss.resteasy.core.Dispatcher;
 import org.jboss.resteasy.mock.MockDispatcherFactory;
-import org.junit.BeforeClass;
-import javax.ws.rs.Path;
 
+import javax.ws.rs.Path;
 
 public class BaseTest {
     protected static Dispatcher dispatcher;
     protected static ObjectMapper objectMapper;
 
-    @BeforeClass
-    public static void setUp() {
+    public static void init() {
         ApplicationTest application = new ApplicationTest();
 
         objectMapper = ObjectMapperFactory.create();
