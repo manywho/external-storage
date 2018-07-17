@@ -23,7 +23,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
-
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URI;
@@ -61,28 +60,13 @@ public class StateControllerTest extends BaseTest {
             now = now.withNano(0);
         }
 
+        // you can find examples of the following keys at test/java/com/boomi/flow/external/storage/key/example
         PublicJsonWebKey plaformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
-        // e.g. full key: {"kty":"EC","kid":"918f5a24-290e-4659-9cd6-c8d95aee92c6","x":"4uV_ZyVYrm6QV1p7OPg-3BtOvoc_Pc6WGU8Rw4YT4MICzszxNqXCAoIT2iwOWiFO","y":"a_JUmWGAtF-xAlCLUZHmrNzsjpwLe3H4onDj6m3hKCmYRu7JIP5pNLecaw2lggcS","crv":"P-384","d":"1zK95W1S7WgHd62sr7MsN8mwmMgsVtj4jBGYgtnvMHAY7iiWUSIdtyjmCfgHGML_"}
-
         PublicJsonWebKey receiverFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
-        // e.g. full key: {"kty":"EC","kid":"918f5a24-290e-4659-9cd6-c8d95aee92c6","x":"Sw9dXf0VErH_kaP7wWqsy1Iy4ahIwRDWKBG4sHtl-2Rmy4NrFpttFAK2Akcj__Gg","y":"TJAzD-yQqdvNyFTpkm6f-NC_QIz71MSeeMWOcYwKC-SBkmsI4ixNCmK6LSefq7Gs","crv":"P-384","d":"vGy3w59unwLxuWSE82ApKgJmmOSDfb-5jUQ-bRwx-7-3VXE43a0t1RJtyp8XwcZe"}
 
         // encrypt and sign body
-        StateRequest[] requestList = createSignedEncryptedBody(
-                stateId,
-                tenantId,
-                parentId,
-                flowId,
-                flowFersionId,
-                false,
-                currentMapElementId,
-                currentUserId,
-                now,
-                now,
-                content,
-                plaformFull,
-                receiverFull
-        );
+        StateRequest[] requestList = createSignedEncryptedBody(stateId, tenantId, parentId, flowId, flowFersionId,
+                false, currentMapElementId, currentUserId, now, now, content, plaformFull, receiverFull);
 
         MockHttpRequest request = MockHttpRequest.post("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -155,21 +139,10 @@ public class StateControllerTest extends BaseTest {
         });
     }
 
-    private StateRequest[] createSignedEncryptedBody(
-            UUID id,
-            UUID tenantId,
-            UUID parentId,
-            UUID flowId,
-            UUID flowVersionId,
-            boolean isDone,
-            UUID currentMapElement,
-            UUID currentUserId,
-            OffsetDateTime createdAt,
-            OffsetDateTime updatedAt,
-            String content,
-            PublicJsonWebKey platformJwk,
-            PublicJsonWebKey receiverJwk
-    ) {
+    private StateRequest[] createSignedEncryptedBody(UUID id, UUID tenantId, UUID parentId, UUID flowId, UUID flowVersionId,
+                                                     boolean isDone, UUID currentMapElement, UUID currentUserId,
+                                                     OffsetDateTime createdAt, OffsetDateTime updatedAt, String content,
+                                                     PublicJsonWebKey platformJwk, PublicJsonWebKey receiverJwk) {
 
         // Create the claims, which will be the content of the JWT
         JwtClaims claims = new JwtClaims();
@@ -193,7 +166,6 @@ public class StateControllerTest extends BaseTest {
         claims.setClaim("createdAt", createdAt);
         claims.setClaim("updatedAt", updatedAt);
         claims.setClaim("content", content);
-
 
         // Create the signature for the actual content
         JsonWebSignature jws = new JsonWebSignature();
