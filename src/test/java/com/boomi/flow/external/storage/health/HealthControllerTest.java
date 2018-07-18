@@ -4,10 +4,18 @@ import com.boomi.flow.external.storage.BaseTest;
 import org.jboss.resteasy.mock.MockHttpRequest;
 import org.jboss.resteasy.mock.MockHttpResponse;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.net.URISyntaxException;
 
 public class HealthControllerTest extends BaseTest {
+
+    @BeforeClass
+    public static void setUp() {
+        BaseTest.init();
+    }
+
     @Test
     public void testHealthCheck() throws URISyntaxException {
         MockHttpRequest request = MockHttpRequest.get("/health");
