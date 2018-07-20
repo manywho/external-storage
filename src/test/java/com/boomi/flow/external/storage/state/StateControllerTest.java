@@ -4,14 +4,13 @@ import com.boomi.flow.external.storage.BaseTest;
 import com.boomi.flow.external.storage.Migrator;
 import com.boomi.flow.external.storage.guice.HikariDataSourceProvider;
 import com.boomi.flow.external.storage.guice.JdbiProvider;
-import com.boomi.flow.external.storage.guice.StateRepositoryProvider;
 import com.boomi.flow.external.storage.states.State;
-import com.boomi.flow.external.storage.states.StateRepository;
 import com.boomi.flow.external.storage.utils.Environment;
 import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
 import com.google.common.io.Resources;
 import org.jboss.resteasy.mock.MockHttpRequest;
 import org.jboss.resteasy.mock.MockHttpResponse;
+import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
@@ -19,8 +18,13 @@ import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
+import org.jose4j.jwt.MalformedClaimException;
+import org.jose4j.jwt.consumer.InvalidJwtException;
+import org.jose4j.jwt.consumer.JwtConsumer;
+import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.*;
 import org.skyscreamer.jsonassert.JSONAssert;
 import javax.ws.rs.core.MediaType;
@@ -35,32 +39,49 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_192_CBC_HMAC_SHA_384;
+import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
+import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW;
+import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW;
+import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384;
+
 public class StateControllerTest extends BaseTest {
 
-    @BeforeClass
-    public static void setUp() {
+    @Before
+    public void setUp() {
         BaseTest.init();
         Migrator.executeMigrations();
     }
 
+    @After
+    public void cleanUp() {
+        var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
+        String sqlDelete = "DELETE FROM states";
+        jdbi.withHandle(handle -> {
+            if (isMysql()) {
+                handle.registerArgument(new UuidArgumentFactory());
+            }
+
+            return handle.createUpdate(sqlDelete)
+                    .execute();
+        });
+    }
+
     @Test
-    @Ignore
-    public void testFindState() throws URISyntaxException, IOException, JSONException {
-        String expectedResponse = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/encrypted-signed-valid-state.json").toURI())));
+    public void testFindState() throws URISyntaxException, IOException, JSONException, JoseException, MalformedClaimException, InvalidJwtException {
         String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/valid-state.json").toURI())));
-        State state = objectMapper.readValue(validStateString, State.class);
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
         var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
 
         jdbi.useHandle(handle -> {
-            handle.createUpdate(
-                    "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
-                            "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)")
-                    .bind("content", validStateString)
-                    .execute();
-            }
+                    handle.createUpdate(
+                            "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
+                                    "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)")
+                            .bind("content", validStateString)
+                            .execute();
+                }
         );
 
         MockHttpRequest request = MockHttpRequest.get(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()))
@@ -70,10 +91,8 @@ public class StateControllerTest extends BaseTest {
         MockHttpResponse response = new MockHttpResponse();
         dispatcher.invoke(request, response);
 
-        // todo: this is failing
-        JSONAssert.assertEquals(expectedResponse, response.getContentAsString(),false);
-
-        deleteStates();
+        String state = decryptToken(new JSONObject(response.getContentAsString()).getString("token"));
+        JSONAssert.assertEquals(validStateString, state, false);
     }
 
     @Test
@@ -146,32 +165,43 @@ public class StateControllerTest extends BaseTest {
             Timestamp updated_at = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Assert.assertEquals(nowWithoutTimezone, created_at);
             Assert.assertEquals(nowWithoutTimezone, updated_at);
-        }else{
+        } else {
             Assert.assertEquals(now, stateOptional.get().getCreatedAt());
             Assert.assertEquals(now, stateOptional.get().getUpdatedAt());
         }
 
-        JSONAssert.assertEquals(content, stateOptional.get().getContent(),false);
-
-        deleteStates();
+        JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
     }
 
     private static boolean isMysql() {
         return "mysql".equals(URI.create(Environment.get("DATABASE_URL").trim().substring(5)).getScheme());
     }
 
-    @AfterClass
-    public static void deleteStates() {
-        var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
-        String sqlDelete = "DELETE FROM states";
-        jdbi.withHandle(handle -> {
-            if (isMysql()) {
-                handle.registerArgument(new UuidArgumentFactory());
-            }
+    private String decryptToken(String token) throws JoseException, InvalidJwtException, MalformedClaimException {
+        PublicJsonWebKey plaformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
+        PublicJsonWebKey receiverFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
 
-            return handle.createUpdate(sqlDelete)
-                .execute();
-        });
+        // Create constraints for the algorithms that incoming tokens need to use, otherwise decoding will fail
+        var jwsAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ECDSA_USING_P384_CURVE_AND_SHA384);
+        var jweAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ECDH_ES_A192KW, ECDH_ES_A256KW);
+        var jceAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, AES_192_CBC_HMAC_SHA_384, AES_256_CBC_HMAC_SHA_512);
+
+        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
+                .setRequireExpirationTime()
+                .setMaxFutureValidityInMinutes(300)
+                .setExpectedIssuer("receiver")
+                .setExpectedAudience("manywho")
+                .setDecryptionKey(plaformFull.getPrivateKey())
+                .setVerificationKey(receiverFull.getPublicKey())
+                .setJwsAlgorithmConstraints(jwsAlgorithmConstraints)
+                .setJweAlgorithmConstraints(jweAlgorithmConstraints)
+                .setJweContentEncryptionAlgorithmConstraints(jceAlgorithmConstraints)
+                .build();
+
+        JwtClaims claims;
+        claims = jwtConsumer.processToClaims(token);
+
+        return claims.getStringClaimValue("content");
     }
 
     private StateRequest[] createSignedEncryptedBody(UUID id, UUID tenantId, UUID parentId, UUID flowId, UUID flowVersionId,
