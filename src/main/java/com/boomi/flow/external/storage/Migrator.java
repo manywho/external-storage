@@ -15,7 +15,12 @@ public class Migrator {
         flyway.setDataSource(dataSource);
 
         // possible supported values for path are mysql, postgresql and sqlserver
-        String path = URI.create(Environment.get("DATABASE_URL").trim().substring(5)).getScheme();
+        var databaseUrl = System.getenv("JDBC_DATABASE_URL");
+        if (databaseUrl == null) {
+            databaseUrl = Environment.get("DATABASE_URL");
+        }
+
+        String path = URI.create(databaseUrl.trim().substring(5)).getScheme();
         flyway.setLocations(String.format("migrations/%s", path));
         flyway.migrate();
 
