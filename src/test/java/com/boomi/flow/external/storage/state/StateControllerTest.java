@@ -36,9 +36,10 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_192_CBC_HMAC_SHA_384;
 import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
 import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW;
@@ -68,8 +69,49 @@ public class StateControllerTest extends BaseTest {
     }
 
     @Test
+    public void testDeleteState() throws URISyntaxException, IOException {
+        String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
+
+        UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
+        UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
+        var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
+
+        jdbi.useHandle(handle -> {
+                    handle.createUpdate(
+                            "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
+                                    "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)")
+                            .bind("content", validStateString)
+                            .execute();
+                }
+        );
+
+        List<UUID> uuids = new ArrayList<>();
+        uuids.add(stateId);
+
+        MockHttpRequest request = MockHttpRequest.delete(String.format("/states/%s", tenantId.toString()))
+                .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
+                .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
+                .content(objectMapper.writeValueAsBytes(uuids))
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MockHttpResponse response = new MockHttpResponse();
+        dispatcher.invoke(request, response);
+
+        Assert.assertEquals(204, response.getStatus());
+
+        jdbi.useHandle(handle -> {
+                    int numberOfStates = handle.createQuery("SELECT COUNT(*) FROM states")
+                            .mapTo(int.class)
+                            .findOnly();
+
+                    Assert.assertEquals(0, numberOfStates);
+                }
+        );
+    }
+
+    @Test
     public void testFindState() throws URISyntaxException, IOException, JSONException, JoseException, MalformedClaimException, InvalidJwtException {
-        String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/valid-state.json").toURI())));
+        String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
@@ -98,7 +140,7 @@ public class StateControllerTest extends BaseTest {
     @Test
     public void testSaveStates() throws URISyntaxException, IOException, JoseException, JSONException {
 
-        String content = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/valid-state.json").toURI())));
+        String content = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
@@ -219,7 +261,7 @@ public class StateControllerTest extends BaseTest {
         claims.setNotBeforeMinutesInThePast(2); // time before which the token is not yet valid (2 minutes ago)
         claims.setSubject(id.toString()); // the subject/principal is whom the token is about
 
-        // Add the valid-state.json metadata as claims, so any verifying consumer gets undeniably correct information
+        // Add the state.json metadata as claims, so any verifying consumer gets undeniably correct information
         claims.setClaim("id", id);
         claims.setClaim("tenant", tenantId);
         claims.setClaim("parent", parentId);
