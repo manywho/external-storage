@@ -51,7 +51,7 @@ public class StateControllerTest extends BaseTest {
         var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
         String sqlDelete = "DELETE FROM states";
         jdbi.withHandle(handle -> {
-            if (isMysqlDatabase()) {
+            if (databaseType().equals("mysql")) {
                 handle.registerArgument(new UuidArgumentFactory());
             }
 
@@ -65,7 +65,7 @@ public class StateControllerTest extends BaseTest {
         var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
         String sqlDelete = "DELETE FROM states";
         jdbi.withHandle(handle -> {
-            if (isMysqlDatabase()) {
+            if (databaseType().equals("mysql")) {
                 handle.registerArgument(new UuidArgumentFactory());
             }
 
@@ -83,9 +83,7 @@ public class StateControllerTest extends BaseTest {
         var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
 
         jdbi.useHandle(handle -> {
-                    handle.createUpdate(
-                            "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
-                                    "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)")
+                    handle.createUpdate(insertState())
                             .bind("content", validStateString)
                             .execute();
                 }
@@ -123,14 +121,9 @@ public class StateControllerTest extends BaseTest {
         UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
         var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
 
-        jdbi.useHandle(handle -> {
-                    handle.createUpdate(
-                            "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
-                                    "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)")
+        jdbi.useHandle(handle -> handle.createUpdate(insertState())
                             .bind("content", validStateString)
-                            .execute();
-                }
-        );
+                            .execute());
 
         String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
 
@@ -161,19 +154,19 @@ public class StateControllerTest extends BaseTest {
 
         OffsetDateTime now = OffsetDateTime.now();
 
-        if (isMysqlDatabase()) {
+        if (databaseType().equals("mysql")) {
             // my sql doesn't save the nanoseconds, also seems to truncate with a round up or round down,
             // I have set nano to 0 to avoid problems for now
             now = now.withNano(0);
         }
 
         // you can find examples of the following keys at test/resources/example-key
-        PublicJsonWebKey plaformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
-        PublicJsonWebKey receiverFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
+        PublicJsonWebKey platformFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
+        PublicJsonWebKey receiverFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
 
         // encrypt and sign body
         StateRequest[] requestList = createSignedEncryptedBody(stateId, tenantId, parentId, flowId, flowVersionId,
-                false, currentMapElementId, currentUserId, now, now, content, plaformFull, receiverFull);
+                false, currentMapElementId, currentUserId, now, now, content, platformFullKey, receiverFullKey);
 
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
@@ -192,7 +185,7 @@ public class StateControllerTest extends BaseTest {
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
 
         Optional<State> stateOptional = jdbi.withHandle(handle -> {
-            if (isMysqlDatabase()) {
+            if (databaseType().equals("mysql")) {
                 handle.registerArgument(new UuidArgumentFactory());
             }
 
@@ -213,7 +206,7 @@ public class StateControllerTest extends BaseTest {
         // Assert.assertTrue(stateOptional.get().isDone());
         Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
-        if (isMysqlDatabase()) {
+        if (databaseType().equals("mysql")) {
             Timestamp nowWithoutTimezone = Timestamp.valueOf(now.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp created_at = Timestamp.valueOf(stateOptional.get().getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updated_at = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
@@ -291,4 +284,19 @@ public class StateControllerTest extends BaseTest {
                 new StateRequest(serializedJwe)
         };
     }
+
+    private String insertState() {
+        switch (databaseType()) {
+            case "mysql":
+                return "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
+                        "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00', '2018-07-17 11:32:00', :content)";
+            case "sqlserver":
+                return "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
+                        "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)";
+            default:
+                return "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
+                        "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', true, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content::jsonb)";
+        }
+    }
+
 }

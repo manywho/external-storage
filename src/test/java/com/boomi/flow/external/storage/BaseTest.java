@@ -115,13 +115,11 @@ public class BaseTest {
         return claims.getStringClaimValue("content");
     }
 
-    protected static boolean isMysqlDatabase() {
-        return "mysql".equals(URI.create(Environment.get("DATABASE_URL").trim().substring(5)).getScheme());
-    }
-
     protected static String testUrl(String path) {
-        //PortProvider
         return String.format("http://%s:%d%s", PortProvider.getHost(), PortProvider.getPort(), path);
     }
 
+    protected static String databaseType() {
+        return URI.create(Environment.get("DATABASE_URL").trim().substring(5)).getScheme();
+    }
 }
