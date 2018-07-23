@@ -5,12 +5,8 @@ import com.boomi.flow.external.storage.Migrator;
 import com.boomi.flow.external.storage.guice.HikariDataSourceProvider;
 import com.boomi.flow.external.storage.guice.JdbiProvider;
 import com.boomi.flow.external.storage.states.State;
-import com.boomi.flow.external.storage.utils.Environment;
 import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
 import com.google.common.io.Resources;
-import org.jboss.resteasy.mock.MockHttpRequest;
-import org.jboss.resteasy.mock.MockHttpResponse;
-import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
@@ -20,16 +16,15 @@ import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
-import org.jose4j.jwt.consumer.JwtConsumer;
-import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.*;
 import org.skyscreamer.jsonassert.JSONAssert;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -40,26 +35,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_192_CBC_HMAC_SHA_384;
-import static org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers.AES_256_CBC_HMAC_SHA_512;
-import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A192KW;
-import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW;
-import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384;
 
 public class StateControllerTest extends BaseTest {
-
-    @Before
-    public void setUp() {
+    @BeforeClass
+    public static void init() {
         BaseTest.init();
+
         Migrator.executeMigrations();
     }
 
-    @After
-    public void cleanUp() {
+    @AfterClass
+    public static void stop() {
+        BaseTest.stop();
+
         var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
         String sqlDelete = "DELETE FROM states";
         jdbi.withHandle(handle -> {
-            if (isMysql()) {
+            if (isMysqlDatabase()) {
+                handle.registerArgument(new UuidArgumentFactory());
+            }
+
+            return handle.createUpdate(sqlDelete)
+                    .execute();
+        });
+    }
+
+    @After
+    public void cleanSate() {
+        var jdbi = new JdbiProvider(new HikariDataSourceProvider().get()).get();
+        String sqlDelete = "DELETE FROM states";
+        jdbi.withHandle(handle -> {
+            if (isMysqlDatabase()) {
                 handle.registerArgument(new UuidArgumentFactory());
             }
 
@@ -69,7 +75,7 @@ public class StateControllerTest extends BaseTest {
     }
 
     @Test
-    public void testDeleteState() throws URISyntaxException, IOException {
+    public void testDeleteState() throws URISyntaxException, IOException, JoseException {
         String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
@@ -88,14 +94,14 @@ public class StateControllerTest extends BaseTest {
         List<UUID> uuids = new ArrayList<>();
         uuids.add(stateId);
 
-        MockHttpRequest request = MockHttpRequest.delete(String.format("/states/%s", tenantId.toString()))
+        String uri = testUrl(String.format("/states/%s", tenantId.toString()));
+        Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
+
+        Response response = client.target(uri).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .content(objectMapper.writeValueAsBytes(uuids))
-                .contentType(MediaType.APPLICATION_JSON);
-
-        MockHttpResponse response = new MockHttpResponse();
-        dispatcher.invoke(request, response);
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .method("DELETE", entity);
 
         Assert.assertEquals(204, response.getStatus());
 
@@ -126,14 +132,17 @@ public class StateControllerTest extends BaseTest {
                 }
         );
 
-        MockHttpRequest request = MockHttpRequest.get(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()))
+        String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
+
+        String stateEncrypted = client.target(uri)
+                .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .contentType(MediaType.APPLICATION_JSON);
-        MockHttpResponse response = new MockHttpResponse();
-        dispatcher.invoke(request, response);
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .accept(MediaType.APPLICATION_JSON)
+                .get(String.class);
 
-        String state = decryptToken(new JSONObject(response.getContentAsString()).getString("token"));
+        String state = decryptToken(new JSONObject(stateEncrypted).getString("token"));
         JSONAssert.assertEquals(validStateString, state, false);
     }
 
@@ -152,7 +161,7 @@ public class StateControllerTest extends BaseTest {
 
         OffsetDateTime now = OffsetDateTime.now();
 
-        if (isMysql()) {
+        if (isMysqlDatabase()) {
             // my sql doesn't save the nanoseconds, also seems to truncate with a round up or round down,
             // I have set nano to 0 to avoid problems for now
             now = now.withNano(0);
@@ -166,12 +175,15 @@ public class StateControllerTest extends BaseTest {
         StateRequest[] requestList = createSignedEncryptedBody(stateId, tenantId, parentId, flowId, flowVersionId,
                 false, currentMapElementId, currentUserId, now, now, content, plaformFull, receiverFull);
 
-        MockHttpRequest request = MockHttpRequest.post("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsBytes(requestList));
+        String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
+        Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
-        MockHttpResponse response = new MockHttpResponse();
-        dispatcher.invoke(request, response);
+        Response response = client.target(url).request()
+                .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
+                .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
+                .post(entity);
+
 
         Assert.assertEquals(204, response.getStatus());
 
@@ -180,7 +192,7 @@ public class StateControllerTest extends BaseTest {
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
 
         Optional<State> stateOptional = jdbi.withHandle(handle -> {
-            if (isMysql()) {
+            if (isMysqlDatabase()) {
                 handle.registerArgument(new UuidArgumentFactory());
             }
 
@@ -201,7 +213,7 @@ public class StateControllerTest extends BaseTest {
         // Assert.assertTrue(stateOptional.get().isDone());
         Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
-        if (isMysql()) {
+        if (isMysqlDatabase()) {
             Timestamp nowWithoutTimezone = Timestamp.valueOf(now.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp created_at = Timestamp.valueOf(stateOptional.get().getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updated_at = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
@@ -213,37 +225,6 @@ public class StateControllerTest extends BaseTest {
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
-    }
-
-    private static boolean isMysql() {
-        return "mysql".equals(URI.create(Environment.get("DATABASE_URL").trim().substring(5)).getScheme());
-    }
-
-    private String decryptToken(String token) throws JoseException, InvalidJwtException, MalformedClaimException {
-        PublicJsonWebKey plaformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
-        PublicJsonWebKey receiverFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
-
-        // Create constraints for the algorithms that incoming tokens need to use, otherwise decoding will fail
-        var jwsAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ECDSA_USING_P384_CURVE_AND_SHA384);
-        var jweAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, ECDH_ES_A192KW, ECDH_ES_A256KW);
-        var jceAlgorithmConstraints = new AlgorithmConstraints(AlgorithmConstraints.ConstraintType.WHITELIST, AES_192_CBC_HMAC_SHA_384, AES_256_CBC_HMAC_SHA_512);
-
-        JwtConsumer jwtConsumer = new JwtConsumerBuilder()
-                .setRequireExpirationTime()
-                .setMaxFutureValidityInMinutes(300)
-                .setExpectedIssuer("receiver")
-                .setExpectedAudience("manywho")
-                .setDecryptionKey(plaformFull.getPrivateKey())
-                .setVerificationKey(receiverFull.getPublicKey())
-                .setJwsAlgorithmConstraints(jwsAlgorithmConstraints)
-                .setJweAlgorithmConstraints(jweAlgorithmConstraints)
-                .setJweContentEncryptionAlgorithmConstraints(jceAlgorithmConstraints)
-                .build();
-
-        JwtClaims claims;
-        claims = jwtConsumer.processToClaims(token);
-
-        return claims.getStringClaimValue("content");
     }
 
     private StateRequest[] createSignedEncryptedBody(UUID id, UUID tenantId, UUID parentId, UUID flowId, UUID flowVersionId,

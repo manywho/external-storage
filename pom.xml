@@ -96,8 +96,13 @@
             <version>1.5.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-client</artifactId>
+            <version>3.0.19.Final</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-
     <build>
         <finalName>external-storage</finalName>
         <plugins>

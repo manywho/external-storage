@@ -1,26 +1,17 @@
 package com.boomi.flow.external.storage.health;
 
 import com.boomi.flow.external.storage.BaseTest;
-import org.jboss.resteasy.mock.MockHttpRequest;
-import org.jboss.resteasy.mock.MockHttpResponse;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.net.URISyntaxException;
+import javax.ws.rs.core.Response;
 
 public class HealthControllerTest extends BaseTest {
 
-    @BeforeClass
-    public static void setUp() {
-        BaseTest.init();
-    }
-
     @Test
-    public void testHealthCheck() throws URISyntaxException {
-        MockHttpRequest request = MockHttpRequest.get("/health");
-        MockHttpResponse response = new MockHttpResponse();
-        dispatcher.invoke(request, response);
+    public void testHealthCheck() {
+        String url = testUrl("/health");
+        Response response = client.target(url).request().get();
         Assert.assertEquals(200, response.getStatus());
     }
 }
