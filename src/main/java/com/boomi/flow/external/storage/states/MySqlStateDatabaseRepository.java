@@ -1,9 +1,8 @@
 package com.boomi.flow.external.storage.states;
 
-import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
+
 import java.time.ZoneOffset;
 
 public class MySqlStateDatabaseRepository extends StateDatabaseRepository {
@@ -26,11 +25,6 @@ public class MySqlStateDatabaseRepository extends StateDatabaseRepository {
                 .bind("createdAt", state.getCreatedAt().atZoneSameInstant(ZoneOffset.UTC))
                 .bind("updatedAt", state.getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC))
                 .add();
-    }
-
-    @Override
-    protected void addCustomArgument(Handle handle) {
-        handle.registerArgument(new UuidArgumentFactory());
     }
 
     @Override

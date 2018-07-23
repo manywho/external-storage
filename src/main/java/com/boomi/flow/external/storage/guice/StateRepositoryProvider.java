@@ -5,6 +5,7 @@ import com.boomi.flow.external.storage.states.PostgresqlStateDatabaseRepository;
 import com.boomi.flow.external.storage.states.SqlServerDatabaseRepository;
 import com.boomi.flow.external.storage.states.StateRepository;
 import com.boomi.flow.external.storage.utils.Environment;
+import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
 import com.google.inject.Provider;
 import org.jdbi.v3.core.Jdbi;
 
@@ -31,6 +32,7 @@ public class StateRepositoryProvider implements Provider<StateRepository> {
 
         switch (databaseType) {
             case "mysql":
+                jdbi.registerArgument(new UuidArgumentFactory());
                 return new MySqlStateDatabaseRepository(jdbi);
             case "sqlserver":
                 return new SqlServerDatabaseRepository(jdbi);
