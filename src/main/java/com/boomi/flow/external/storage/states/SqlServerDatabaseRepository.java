@@ -2,29 +2,12 @@ package com.boomi.flow.external.storage.states;
 
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
-import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
-import java.util.List;
-import java.util.UUID;
 
 public class SqlServerDatabaseRepository extends StateDatabaseRepository {
-    private Jdbi jdbi;
 
     public SqlServerDatabaseRepository(Jdbi jdbi)
     {
         super(jdbi);
-        this.jdbi = jdbi;
-    }
-
-    @Override
-    public void save(UUID tenant, List<State> states) {
-        jdbi.withHandle(handle -> {
-            var batch = handle.prepareBatch(upsertQuery());
-            for (State state: states) {
-                handle.useTransaction(TransactionIsolationLevel.SERIALIZABLE, handle1 -> addStateToBatch(batch, state));
-            }
-
-            return batch.execute();
-        });
     }
 
     @Override
@@ -45,10 +28,14 @@ public class SqlServerDatabaseRepository extends StateDatabaseRepository {
 
     @Override
     protected String upsertQuery() {
-        return ("IF EXISTS ( SELECT * FROM states WITH (UPDLOCK) WHERE id = :id ) " +
-                "        UPDATE states SET flow_id =:flow, flow_version_id =:flowVersion, is_done =:isDone, current_map_element_id=:currentMapElement, current_user_id = :currentUser, updated_at =:updatedAt, content=:content " +
-                "    ELSE " +
-                "        INSERT states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES (:id, :tenant, :parent, :flow, :flowVersion, :isDone, :currentMapElement, :currentUser, :createdAt, :updatedAt, :content)");
+        return ("MERGE states WITH (HOLDLOCK) AS myTarget " +
+                "  USING (SELECT :id id, :tenant tenant_id, :parent parent_id, :flow flow_id, :flowVersion flow_version_id, :isDone is_done, :currentMapElement current_map_element_id, :currentUser current_user_id, :createdAt created_at, :updatedAt updated_at, :content content) AS mySource " +
+                "    ON mySource.id = myTarget.id  and mySource.id=:id " +
+                "WHEN MATCHED and myTarget.updated_at <= mySource.updated_at THEN UPDATE " +
+                "    SET flow_id =mySource.flow_id, flow_version_id =mySource.flow_version_id, is_done =mySource.is_done, current_map_element_id=mySource.current_map_element_id, current_user_id = mySource.current_user_id, updated_at =mySource.updated_at, content=mySource.content " +
+                "WHEN NOT MATCHED THEN " +
+                "    INSERT (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) " +
+                "    VALUES (mySource.id, mySource.tenant_id, mySource.parent_id, mySource.flow_id, mySource.flow_version_id, mySource.is_done, mySource.current_map_element_id, mySource.current_user_id, mySource.created_at, mySource.updated_at, mySource.content); ");
 
     }
 }
