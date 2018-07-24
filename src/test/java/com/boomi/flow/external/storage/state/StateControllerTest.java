@@ -5,7 +5,7 @@ import com.boomi.flow.external.storage.Migrator;
 import com.boomi.flow.external.storage.guice.HikariDataSourceProvider;
 import com.boomi.flow.external.storage.guice.JdbiProvider;
 import com.boomi.flow.external.storage.states.State;
-import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
+import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import com.google.common.io.Resources;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;

@@ -5,7 +5,7 @@ import com.boomi.flow.external.storage.states.PostgresqlStateDatabaseRepository;
 import com.boomi.flow.external.storage.states.SqlServerDatabaseRepository;
 import com.boomi.flow.external.storage.states.StateRepository;
 import com.boomi.flow.external.storage.utils.Environment;
-import com.boomi.flow.external.storage.utils.UuidArgumentFactory;
+import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import com.google.inject.Provider;
 import org.jdbi.v3.core.Jdbi;
 

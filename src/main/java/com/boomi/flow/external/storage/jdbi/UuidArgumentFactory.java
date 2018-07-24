@@ -1,4 +1,4 @@
-package com.boomi.flow.external.storage.utils;
+package com.boomi.flow.external.storage.jdbi;
 
 import org.jdbi.v3.core.argument.AbstractArgumentFactory;
 import org.jdbi.v3.core.argument.Argument;
