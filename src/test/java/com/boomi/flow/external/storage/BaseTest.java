@@ -1,6 +1,5 @@
 package com.boomi.flow.external.storage;
 
-import com.boomi.flow.external.storage.guice.HikariDataSourceProvider;
 import com.boomi.flow.external.storage.utils.Environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manywho.sdk.api.jackson.ObjectMapperFactory;
@@ -42,7 +41,7 @@ public class BaseTest {
         server = new UndertowJaxrsServer();
         server.start();
         server.deploy(ApplicationTest.class);
-        jdbi = Jdbi.create(new HikariDataSourceProvider().get());
+        jdbi = Jdbi.create(System.getenv("DATABASE_URL"),System.getenv("DATABASE_USERNAME"),System.getenv("DATABASE_PASSWORD"));
     }
 
     @AfterClass
