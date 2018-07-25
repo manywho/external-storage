@@ -1,10 +1,12 @@
 package com.boomi.flow.external.storage;
 
+import com.boomi.flow.external.storage.guice.HikariDataSourceProvider;
 import com.boomi.flow.external.storage.utils.Environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manywho.sdk.api.jackson.ObjectMapperFactory;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.util.PortProvider;
+import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -18,8 +20,6 @@ import org.jose4j.lang.JoseException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -33,8 +33,8 @@ import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA
 
 public class BaseTest {
     private static UndertowJaxrsServer server;
-    protected static Client client;
     protected static ObjectMapper objectMapper;
+    protected static Jdbi jdbi;
 
     @BeforeClass
     public static void init() {
@@ -42,7 +42,7 @@ public class BaseTest {
         server = new UndertowJaxrsServer();
         server.start();
         server.deploy(ApplicationTest.class);
-        client = ClientBuilder.newClient();
+        jdbi = Jdbi.create(new HikariDataSourceProvider().get());
     }
 
     @AfterClass
