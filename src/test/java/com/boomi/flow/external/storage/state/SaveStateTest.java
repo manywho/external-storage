@@ -261,7 +261,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
-        Assert.assertEquals(401, response.getStatus());
+        Assert.assertEquals(400, response.getStatus());
     }
 
     @Test
@@ -278,7 +278,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
-        Assert.assertEquals(401, response.getStatus());
+        Assert.assertEquals(400, response.getStatus());
     }
 
     private Entity<String> validEntity() throws IOException, JoseException, URISyntaxException {
