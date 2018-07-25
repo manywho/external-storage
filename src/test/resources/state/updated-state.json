@@ -1,0 +1,196 @@
+{
+  "log": {
+    "flowId": "7808267e-b09a-44b2-be2b-4216a9513b71",
+    "entries": {},
+    "stateId": "4b8b27d3-e4f3-4a78-8822-12476582af8a",
+    "tenantId": "918f5a24-290e-4659-9cd6-c8d95aee92c6",
+    "isEnabled": false,
+    "hasEntries": false,
+    "flowDeveloperName": "my updated flow"
+  },
+  "isDone": true,
+  "expiresAt": "2018-07-26T11:18:49.6706798+01:00",
+  "isExpired": false,
+  "listeners": {},
+  "userOwner": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+  "compositeId": {
+    "guid": "4b8b27d3-e4f3-4a78-8822-12476582af8a",
+    "versionId": "00000000-0000-0000-0000-000000000000"
+  },
+  "dateCreated": "2018-07-12T11:18:49.6706332+01:00",
+  "isCommitted": false,
+  "isCompleted": false,
+  "userCreated": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+  "dateModified": "2018-07-12T11:19:52.2567023+01:00",
+  "stateEntries": [
+    {
+      "guid": "ceaf6222-4df2-4290-9d51-078b7fb04876",
+      "flowId": {
+        "guid": "7808267e-b09a-44b2-be2b-4216a9513b71",
+        "versionId": "f8bfd40b-8e0b-4966-884e-ed6159aec3dc",
+        "isVersionless": false
+      },
+      "mapElementId": {
+        "guid": "391b673c-05ed-4b54-b3f3-e56183a8193a",
+        "typeElementPropertyId": "00000000-0000-0000-0000-000000000000"
+      },
+      "dateCommitted": "2018-07-12T11:18:49.6877779+01:00",
+      "userInteractions": [
+        {
+          "speed": 0,
+          "heading": 0,
+          "accuracy": 0,
+          "altitude": 0,
+          "latitude": 0,
+          "longitude": 0,
+          "timeStamp": "2018-07-12T11:18:49.6877644+01:00",
+          "manywhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+          "altitudeAccuracy": 0
+        }
+      ]
+    },
+    {
+      "guid": "f667b8db-db34-4d62-b67b-8023878f1ef0",
+      "flowId": {
+        "guid": "7808267e-b09a-44b2-be2b-4216a9513b71",
+        "versionId": "f8bfd40b-8e0b-4966-884e-ed6159aec3dc",
+        "isVersionless": false
+      },
+      "userVotes": {
+        "public_user": {
+          "speed": 0,
+          "heading": 0,
+          "accuracy": 0,
+          "altitude": 0,
+          "latitude": 0,
+          "longitude": 0,
+          "timeStamp": "0001-01-01T00:00:00+00:00",
+          "manywhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+          "directoryUserId": "PUBLIC_USER",
+          "altitudeAccuracy": 0,
+          "selectedOutcomeId": "8061c870-f2f2-4dd6-89e0-22af6314d9bc"
+        }
+      },
+      "mapElementId": {
+        "guid": "70967069-8522-40d8-8716-6b2ba4a87337",
+        "typeElementPropertyId": "00000000-0000-0000-0000-000000000000"
+      },
+      "dateCommitted": "2018-07-12T11:18:54.3210396+01:00",
+      "userInteractions": [
+        {
+          "speed": 0,
+          "heading": 0,
+          "accuracy": 0,
+          "altitude": 0,
+          "latitude": 0,
+          "longitude": 0,
+          "timeStamp": "2018-07-12T11:18:49.6879117+01:00",
+          "manywhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+          "altitudeAccuracy": 0
+        },
+        {
+          "speed": 0,
+          "heading": 0,
+          "accuracy": 0,
+          "altitude": 0,
+          "latitude": 0,
+          "longitude": 0,
+          "timeStamp": "2018-07-12T11:18:54.3210111+01:00",
+          "manywhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+          "altitudeAccuracy": 0
+        }
+      ]
+    },
+    {
+      "guid": "130d52ef-44fd-4aa2-a9df-5b5434ac51aa",
+      "flowId": {
+        "guid": "7808267e-b09a-44b2-be2b-4216a9513b71",
+        "versionId": "f8bfd40b-8e0b-4966-884e-ed6159aec3dc",
+        "isVersionless": false
+      },
+      "mapElementId": {
+        "guid": "6dc7aea2-335d-40d0-ba34-4571fb135936",
+        "typeElementPropertyId": "00000000-0000-0000-0000-000000000000"
+      },
+      "dateCommitted": "2018-07-12T11:18:54.3213803+01:00",
+      "userInteractions": [
+        {
+          "speed": 0,
+          "heading": 0,
+          "accuracy": 0,
+          "altitude": 0,
+          "latitude": 0,
+          "longitude": 0,
+          "timeStamp": "2018-07-12T11:18:54.321346+01:00",
+          "manywhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+          "altitudeAccuracy": 0
+        }
+      ]
+    }
+  ],
+  "userModified": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+  "executionMode": "",
+  "reportingMode": "",
+  "runningUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+  "isWaitingOnVotes": false,
+  "groupAuthorization": {
+    "id": "8c213b64-04d1-45db-bc0d-b799f6e3582e",
+    "versionId": "00000000-0000-0000-0000-000000000000",
+    "streamBehaviour": "NONE",
+    "showPagesAsReadOnly": false,
+    "globalAuthenticationType": "PUBLIC"
+  },
+  "valueElementValues": {
+    "292d8292-44b4-44b6-af10-75fd0a7639ce": "http://localhost:22936",
+    "4b39694f-aee0-400d-b0e0-26f735b5177b": "http://localhost:22936/918f5a24-290e-4659-9cd6-c8d95aee92c6/play/default?flow-id=7808267e-b09a-44b2-be2b-4216a9513b71",
+    "77b15ed6-5cd2-44fe-b62d-8ce6a4ebf0e0": "4b8b27d3-e4f3-4a78-8822-12476582af8a",
+    "8408f1b5-25f1-45a3-90bb-9ae82ef9fe66": "7808267e-b09a-44b2-be2b-4216a9513b71",
+    "a93f2f14-b765-48f5-8cdd-650d10410d1e": "00000000-0000-0000-0000-000000000000",
+    "e2063196-3c75-4388-8b00-1005b8cd59ad": "http://localhost:22936/918f5a24-290e-4659-9cd6-c8d95aee92c6/play/default?join=4b8b27d3-e4f3-4a78-8822-12476582af8a",
+    "e97c396c-7837-4f82-a366-df19adb318f5": "f8bfd40b-8e0b-4966-884e-ed6159aec3dc"
+  },
+  "precommitStateEntry": {
+    "guid": "6877a343-6477-4d4b-8b17-2fed0406c5e7",
+    "flowId": {
+      "guid": "7808267e-b09a-44b2-be2b-4216a9513b71",
+      "versionId": "f8bfd40b-8e0b-4966-884e-ed6159aec3dc",
+      "isVersionless": false
+    },
+    "mapElementId": {
+      "guid": "6dc7aea2-335d-40d0-ba34-4571fb135936",
+      "typeElementPropertyId": "00000000-0000-0000-0000-000000000000"
+    },
+    "dateCommitted": "0001-01-01T00:00:00+00:00",
+    "nextMapElementId": {
+      "guid": "6dc7aea2-335d-40d0-ba34-4571fb135936",
+      "typeElementPropertyId": "00000000-0000-0000-0000-000000000000"
+    },
+    "userInteractions": [
+      {
+        "speed": 0,
+        "heading": 0,
+        "accuracy": 0,
+        "altitude": 0,
+        "latitude": 0,
+        "longitude": 0,
+        "timeStamp": "2018-07-12T11:19:52.2303514+01:00",
+        "manywhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+        "altitudeAccuracy": 0
+      }
+    ],
+    "valueElementValues": {}
+  },
+  "authorizationContext": {
+    "7808267e-b09a-44b2-be2b-4216a9513b71": {
+      "ownerManyWhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+      "ownerExternalUserId": "PUBLIC_USER",
+      "relativeManyWhoUserId": "52df1a90-3826-4508-b7c2-cde8aa5b72cf",
+      "authorizationElementId": "7808267e-b09a-44b2-be2b-4216a9513b71",
+      "relativeExternalUserId": "PUBLIC_USER"
+    }
+  },
+  "runningUserExternalId": "PUBLIC_USER",
+  "waitingForAuthorizedLogin": false,
+  "currentAuthorizationContext": "7808267e-b09a-44b2-be2b-4216a9513b71",
+  "currentMapElementDeveloperName": "PIN PAN PUM"
+}
