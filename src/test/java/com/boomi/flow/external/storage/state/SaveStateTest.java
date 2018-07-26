@@ -15,7 +15,8 @@ import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
-import org.junit.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.client.Client;
@@ -84,7 +85,7 @@ public class SaveStateTest extends BaseTest {
                 .post(entity);
         client.close();
 
-        Assert.assertEquals(204, response.getStatus());
+        Assertions.assertEquals(204, response.getStatus());
 
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
@@ -101,24 +102,24 @@ public class SaveStateTest extends BaseTest {
                     .findFirst();
         });
 
-        Assert.assertTrue(stateOptional.isPresent());
-        Assert.assertEquals(stateId, stateOptional.get().getId());
-        Assert.assertEquals(tenantId, stateOptional.get().getTenantId());
-        Assert.assertNull(stateOptional.get().getParentId());
-        Assert.assertEquals(flowId, stateOptional.get().getFlowId());
-        Assert.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
+        Assertions.assertTrue(stateOptional.isPresent());
+        Assertions.assertEquals(stateId, stateOptional.get().getId());
+        Assertions.assertEquals(tenantId, stateOptional.get().getTenantId());
+        Assertions.assertNull(stateOptional.get().getParentId());
+        Assertions.assertEquals(flowId, stateOptional.get().getFlowId());
+        Assertions.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
         // todo fix
         // Assert.assertTrue(stateOptional.get().isDone());
-        Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
+        Assertions.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
         // todo createJdbi assertion for createAt too
         if (databaseType().equals("mysql")) {
             Timestamp expectedUpdatedAtWithoutTimezone = Timestamp.valueOf(updatedAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updatedAtWithoutTimezone = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
 
-            Assert.assertEquals(expectedUpdatedAtWithoutTimezone, updatedAtWithoutTimezone);
+            Assertions.assertEquals(expectedUpdatedAtWithoutTimezone, updatedAtWithoutTimezone);
         } else {
-            Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
+            Assertions.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
@@ -170,7 +171,7 @@ public class SaveStateTest extends BaseTest {
                 .post(entity);
         client.close();
 
-        Assert.assertEquals(204, response.getStatus());
+        Assertions.assertEquals(204, response.getStatus());
 
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
@@ -189,15 +190,15 @@ public class SaveStateTest extends BaseTest {
                     .findFirst();
         });
 
-        Assert.assertTrue(stateOptional.isPresent());
-        Assert.assertEquals(stateId, stateOptional.get().getId());
-        Assert.assertEquals(tenantId, stateOptional.get().getTenantId());
-        Assert.assertEquals(parentId, stateOptional.get().getParentId());
-        Assert.assertEquals(flowId, stateOptional.get().getFlowId());
-        Assert.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
+        Assertions.assertTrue(stateOptional.isPresent());
+        Assertions.assertEquals(stateId, stateOptional.get().getId());
+        Assertions.assertEquals(tenantId, stateOptional.get().getTenantId());
+        Assertions.assertEquals(parentId, stateOptional.get().getParentId());
+        Assertions.assertEquals(flowId, stateOptional.get().getFlowId());
+        Assertions.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
         // todo fix
         // Assert.assertTrue(stateOptional.get().isDone());
-        Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
+        Assertions.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
         if (databaseType().equals("mysql")) {
             Timestamp createdAtWithoutTimezone = Timestamp.valueOf(createdAd.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
@@ -206,11 +207,11 @@ public class SaveStateTest extends BaseTest {
             Timestamp created_at = Timestamp.valueOf(stateOptional.get().getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updated_at = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
 
-            Assert.assertEquals(createdAtWithoutTimezone, created_at);
-            Assert.assertEquals(updatedAtWithoutTimezone, updated_at);
+            Assertions.assertEquals(createdAtWithoutTimezone, created_at);
+            Assertions.assertEquals(updatedAtWithoutTimezone, updated_at);
         } else {
-            Assert.assertEquals(createdAd, stateOptional.get().getCreatedAt());
-            Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
+            Assertions.assertEquals(createdAd, stateOptional.get().getCreatedAt());
+            Assertions.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
@@ -297,7 +298,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
         client.close();
-        Assert.assertEquals(401, response.getStatus());
+        Assertions.assertEquals(401, response.getStatus());
     }
 
     @Test
@@ -313,7 +314,7 @@ public class SaveStateTest extends BaseTest {
                 .post(validEntity());
         client.close();
 
-        Assert.assertEquals(401, response.getStatus());
+        Assertions.assertEquals(401, response.getStatus());
     }
 
     @Test
@@ -330,7 +331,7 @@ public class SaveStateTest extends BaseTest {
                 .post(validEntity());
         client.close();
 
-        Assert.assertEquals(400, response.getStatus());
+        Assertions.assertEquals(400, response.getStatus());
     }
 
     @Test
@@ -347,7 +348,7 @@ public class SaveStateTest extends BaseTest {
                 .post(validEntity());
         client.close();
 
-        Assert.assertEquals(400, response.getStatus());
+        Assertions.assertEquals(400, response.getStatus());
     }
 
     private Entity<String> validEntity() throws IOException, JoseException, URISyntaxException {

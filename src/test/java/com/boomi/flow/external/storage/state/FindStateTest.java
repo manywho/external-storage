@@ -8,8 +8,8 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.client.Client;
@@ -71,7 +71,7 @@ public class FindStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
         client.close();
-        Assert.assertEquals(401, response.getStatus());
+        Assertions.assertEquals(401, response.getStatus());
     }
 
     @Test
@@ -91,7 +91,7 @@ public class FindStateTest extends BaseTest {
                 .get();
         client.close();
 
-        Assert.assertEquals(401, response.getStatus());
+        Assertions.assertEquals(401, response.getStatus());
     }
 
     @Test
@@ -111,7 +111,7 @@ public class FindStateTest extends BaseTest {
                 .get();
         client.close();
 
-        Assert.assertEquals(400, response.getStatus());
+        Assertions.assertEquals(400, response.getStatus());
     }
 
     @Test
@@ -131,6 +131,6 @@ public class FindStateTest extends BaseTest {
                 .get();
         client.close();
 
-        Assert.assertEquals(400, response.getStatus());
+        Assertions.assertEquals(400, response.getStatus());
     }
 }

@@ -16,8 +16,8 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -34,14 +34,14 @@ public class BaseTest {
     protected static ObjectMapper objectMapper = ObjectMapperFactory.create();
     protected static UndertowJaxrsServer server;
 
-    @BeforeClass
+    @BeforeAll
     public static void startServer() {
         server = new UndertowJaxrsServer();
         server.start();
         server.deploy(ApplicationTest.class);
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopServer() {
         server.stop();
     }

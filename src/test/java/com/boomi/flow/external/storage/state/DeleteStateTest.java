@@ -6,8 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.Resources;
 import org.jdbi.v3.core.Jdbi;
 import org.jose4j.lang.JoseException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -55,14 +55,14 @@ public class DeleteStateTest extends BaseTest {
                 .method("DELETE", entity);
         client.close();
 
-        Assert.assertEquals(204, response.getStatus());
+        Assertions.assertEquals(204, response.getStatus());
 
         jdbi.useHandle(handle -> {
                     int numberOfStates = handle.createQuery("SELECT COUNT(*) FROM states")
                             .mapTo(int.class)
                             .findOnly();
 
-                    Assert.assertEquals(0, numberOfStates);
+            Assertions.assertEquals(0, numberOfStates);
                 }
         );
 
@@ -89,7 +89,7 @@ public class DeleteStateTest extends BaseTest {
                 .method("DELETE", entity);
         client.close();
 
-        Assert.assertEquals(401, response.getStatus());
+        Assertions.assertEquals(401, response.getStatus());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class DeleteStateTest extends BaseTest {
                 .method("DELETE", entity);
         client.close();
 
-        Assert.assertEquals(400, response.getStatus());
+        Assertions.assertEquals(400, response.getStatus());
     }
 
     @Test
@@ -136,6 +136,6 @@ public class DeleteStateTest extends BaseTest {
                 .method("DELETE", entity);
         client.close();
 
-        Assert.assertEquals(400, response.getStatus());
+        Assertions.assertEquals(400, response.getStatus());
     }
 }
