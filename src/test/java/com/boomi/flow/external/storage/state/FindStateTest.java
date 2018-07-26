@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -27,6 +28,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @ExtendWith(JdbiParameterResolver.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FindStateTest extends BaseTest {
     private static Jdbi jdbi;
 

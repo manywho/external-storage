@@ -10,6 +10,7 @@ import org.jose4j.lang.JoseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.client.Client;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ExtendWith(JdbiParameterResolver.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DeleteStateTest extends BaseTest {
     private static Jdbi jdbi;
 

@@ -20,6 +20,7 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -39,6 +40,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(JdbiParameterResolver.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SaveStateTest extends BaseTest {
     private static Jdbi jdbi;
 
