@@ -11,6 +11,7 @@ import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -27,8 +28,15 @@ import java.util.UUID;
 
 @ExtendWith(JdbiParameterResolver.class)
 public class FindStateTest extends BaseTest {
+    private static Jdbi jdbi;
+
+    @BeforeAll
+    public static void beforeAll(Jdbi jdbiParam) {
+        jdbi = jdbiParam;
+    }
+
     @Test
-    public void testFindState(Jdbi jdbi) throws URISyntaxException, IOException, JSONException, JoseException, MalformedClaimException, InvalidJwtException {
+    public void testFindState() throws URISyntaxException, IOException, JSONException, JoseException, MalformedClaimException, InvalidJwtException {
         String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");

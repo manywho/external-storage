@@ -18,6 +18,7 @@ import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -39,9 +40,16 @@ import java.util.UUID;
 
 @ExtendWith(JdbiParameterResolver.class)
 public class SaveStateTest extends BaseTest {
+    private static Jdbi jdbi;
+
+    @BeforeAll
+    public static void beforeAll(Jdbi jdbiParam) {
+        jdbi = jdbiParam;
+    }
+
 
     @Test
-    public void testUpdateState(Jdbi jdbi) throws URISyntaxException, IOException, JoseException, JSONException {
+    public void testUpdateState() throws URISyntaxException, IOException, JoseException, JSONException {
         OffsetDateTime createdAt = OffsetDateTime.now();
         OffsetDateTime updatedAt = OffsetDateTime.now().plusDays(1);
         String oldContent = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
@@ -132,7 +140,7 @@ public class SaveStateTest extends BaseTest {
 
 
     @Test
-    public void testInsertState(Jdbi jdbi) throws URISyntaxException, IOException, JoseException, JSONException {
+    public void testInsertState() throws URISyntaxException, IOException, JoseException, JSONException {
 
         OffsetDateTime createdAd = OffsetDateTime.now();
         OffsetDateTime updatedAt = OffsetDateTime.now().plusDays(1);

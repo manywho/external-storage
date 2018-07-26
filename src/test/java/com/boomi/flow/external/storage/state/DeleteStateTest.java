@@ -8,6 +8,7 @@ import com.google.common.io.Resources;
 import org.jdbi.v3.core.Jdbi;
 import org.jose4j.lang.JoseException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -26,9 +27,15 @@ import java.util.UUID;
 
 @ExtendWith(JdbiParameterResolver.class)
 public class DeleteStateTest extends BaseTest {
+    private static Jdbi jdbi;
+
+    @BeforeAll
+    public static void beforeAll(Jdbi jdbiParam) {
+        jdbi = jdbiParam;
+    }
 
     @Test
-    public void testDeleteState(Jdbi jdbi) throws URISyntaxException, IOException, JoseException {
+    public void testDeleteState() throws URISyntaxException, IOException, JoseException {
         String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
