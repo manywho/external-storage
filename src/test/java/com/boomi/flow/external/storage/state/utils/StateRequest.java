@@ -1,4 +1,4 @@
-package com.boomi.flow.external.storage.state;
+package com.boomi.flow.external.storage.state.utils;
 
 public class StateRequest {
         private String token;

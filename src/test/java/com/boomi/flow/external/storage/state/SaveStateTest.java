@@ -2,6 +2,8 @@ package com.boomi.flow.external.storage.state;
 
 import com.boomi.flow.external.storage.BaseTest;
 import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
+import com.boomi.flow.external.storage.state.utils.CommonStateTest;
+import com.boomi.flow.external.storage.state.utils.StateRequest;
 import com.boomi.flow.external.storage.states.State;
 import com.google.common.io.Resources;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
@@ -32,51 +34,16 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class SaveStateTest extends BaseTest {
-    @BeforeClass
-    public static void init() {
-        BaseTest.init();
-
-        //Migrator.executeMigrations();
-    }
-
-    @AfterClass
-    public static void stop() {
-        BaseTest.stop();
-
-        String sqlDelete = "DELETE FROM states";
-        jdbi.withHandle(handle -> {
-            if (databaseType().equals("mysql")) {
-                handle.registerArgument(new UuidArgumentFactory());
-            }
-
-            return handle.createUpdate(sqlDelete)
-                    .execute();
-        });
-    }
-
-    @After
-    public void cleanSate() {
-        String sqlDelete = "DELETE FROM states";
-        jdbi.withHandle(handle -> {
-            if (databaseType().equals("mysql")) {
-                handle.registerArgument(new UuidArgumentFactory());
-            }
-
-            return handle.createUpdate(sqlDelete)
-                    .execute();
-        });
-    }
-
-
     @Test
     public void testUpdateState() throws URISyntaxException, IOException, JoseException, JSONException {
-
-        //insert old state
         OffsetDateTime createdAt = OffsetDateTime.now();
         OffsetDateTime updatedAt = OffsetDateTime.now().plusDays(1);
         String oldContent = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
-        jdbi.useHandle(handle -> handle.createUpdate(insertState())
+        var jdbi = createJdbi();
+
+        //insert an state
+        jdbi.useHandle(handle -> handle.createUpdate(CommonStateTest.insertState())
                 .bind("content", oldContent)
                 .execute());
 
@@ -109,12 +76,13 @@ public class SaveStateTest extends BaseTest {
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
         Client client = ClientBuilder.newClient();
+
         Response response = client.target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .post(entity);
-
+        client.close();
 
         Assert.assertEquals(204, response.getStatus());
 
@@ -143,7 +111,7 @@ public class SaveStateTest extends BaseTest {
         // Assert.assertTrue(stateOptional.get().isDone());
         Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
-        // todo create assertion for createAt too
+        // todo createJdbi assertion for createAt too
         if (databaseType().equals("mysql")) {
             Timestamp expectedUpdatedAtWithoutTimezone = Timestamp.valueOf(updatedAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updatedAtWithoutTimezone = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
@@ -154,6 +122,8 @@ public class SaveStateTest extends BaseTest {
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
+
+        CommonStateTest.cleanSates(jdbi);
     }
 
 
@@ -192,17 +162,20 @@ public class SaveStateTest extends BaseTest {
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
         Client client = ClientBuilder.newClient();
+
         Response response = client.target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .post(entity);
-
+        client.close();
 
         Assert.assertEquals(204, response.getStatus());
 
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
+
+        var jdbi = createJdbi();
 
         Optional<State> stateOptional = jdbi.withHandle(handle -> {
             if (databaseType().equals("mysql")) {
@@ -241,6 +214,8 @@ public class SaveStateTest extends BaseTest {
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
+
+        CommonStateTest.cleanSates(jdbi);
     }
 
     private StateRequest[] createSignedEncryptedBody(UUID id, UUID tenantId, UUID parentId, UUID flowId, UUID flowVersionId,
@@ -313,6 +288,7 @@ public class SaveStateTest extends BaseTest {
         String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
 
         Client client = ClientBuilder.newClient();
+
         Response response = client.target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -320,7 +296,7 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Signature", "not valid signature")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
-
+        client.close();
         Assert.assertEquals(401, response.getStatus());
     }
 
@@ -335,6 +311,7 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
+        client.close();
 
         Assert.assertEquals(401, response.getStatus());
     }
@@ -342,25 +319,24 @@ public class SaveStateTest extends BaseTest {
     @Test
     public void testNonPlatformKey() throws JoseException, IOException, URISyntaxException {
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
-
-        String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
-
+        String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
         Client client = ClientBuilder.newClient();
+
         Response response = client.target(url)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
+        client.close();
 
         Assert.assertEquals(400, response.getStatus());
     }
 
     @Test
     public void testNonReceiverKey() throws JoseException, IOException, URISyntaxException {
-
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
-        String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
+        String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
 
         Client client = ClientBuilder.newClient();
         Response response = client.target(url)
@@ -369,6 +345,7 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
+        client.close();
 
         Assert.assertEquals(400, response.getStatus());
     }
@@ -394,19 +371,5 @@ public class SaveStateTest extends BaseTest {
         StateRequest[] requestList = createSignedEncryptedBody(stateId, tenantId, parentId, flowId, flowVersionId,
                 false, currentMapElementId, currentUserId, now, now, content, platformFullKey, receiverFullKey);
         return Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
-    }
-
-    private String insertState() {
-        switch (databaseType()) {
-            case "mysql":
-                return "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
-                        "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00', '2018-07-17 11:32:00', :content)";
-            case "sqlserver":
-                return "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
-                        "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', 1, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content)";
-            default:
-                return "INSERT INTO states (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content) VALUES " +
-                        "('4b8b27d3-e4f3-4a78-8822-12476582af8a', '918f5a24-290e-4659-9cd6-c8d95aee92c6', null, '7808267e-b09a-44b2-be2b-4216a9513b71', 'f8bfd40b-8e0b-4966-884e-ed6159aec3dc', true, '6dc7aea2-335d-40d0-ba34-4571fb135936', '52df1a90-3826-4508-b7c2-cde8aa5b72cf', '2018-07-17 11:32:00.7117030 +01:00', '2018-07-17 11:32:00.7117030 +01:00', :content::jsonb)";
-        }
     }
 }

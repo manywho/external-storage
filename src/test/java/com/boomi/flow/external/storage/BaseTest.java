@@ -31,22 +31,23 @@ import static org.jose4j.jwe.KeyManagementAlgorithmIdentifiers.ECDH_ES_A256KW;
 import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384;
 
 public class BaseTest {
-    private static UndertowJaxrsServer server;
-    protected static ObjectMapper objectMapper;
-    protected static Jdbi jdbi;
+    protected static ObjectMapper objectMapper = ObjectMapperFactory.create();
+    protected static UndertowJaxrsServer server;
 
     @BeforeClass
-    public static void init() {
-        objectMapper = ObjectMapperFactory.create();
+    public static void startServer() {
         server = new UndertowJaxrsServer();
         server.start();
         server.deploy(ApplicationTest.class);
-        jdbi = Jdbi.create(System.getenv("DATABASE_URL"),System.getenv("DATABASE_USERNAME"),System.getenv("DATABASE_PASSWORD"));
     }
 
     @AfterClass
-    public static void stop(){
+    public static void stopServer() {
         server.stop();
+    }
+
+    public Jdbi createJdbi() {
+        return Jdbi.create(System.getenv("DATABASE_URL"), System.getenv("DATABASE_USERNAME"), System.getenv("DATABASE_PASSWORD"));
     }
 
     protected static String createRequestSignature(UUID tenant, String endpoint) throws JoseException {
@@ -74,10 +75,10 @@ public class BaseTest {
         JsonWebSignature jws = new JsonWebSignature();
         jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384); // TODO: Check this
 
-        PublicJsonWebKey plaformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
+        PublicJsonWebKey platformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
 
-        jws.setKey(plaformFull.getPrivateKey());
-        jws.setKeyIdHeaderValue(plaformFull.getKeyId());
+        jws.setKey(platformFull.getPrivateKey());
+        jws.setKeyIdHeaderValue(platformFull.getKeyId());
         jws.setPayload(claims.toJson());
 
         try {
@@ -118,7 +119,7 @@ public class BaseTest {
         return String.format("http://%s:%d%s", PortProvider.getHost(), PortProvider.getPort(), path);
     }
 
-    protected static String databaseType() {
+    public static String databaseType() {
         return URI.create(Environment.get("DATABASE_URL").trim().substring(5)).getScheme();
     }
 }
