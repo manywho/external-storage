@@ -1,11 +1,13 @@
 package com.boomi.flow.external.storage.state;
 
 import com.boomi.flow.external.storage.BaseTest;
+import com.boomi.flow.external.storage.JdbiParameterResolver;
 import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.boomi.flow.external.storage.state.utils.StateRequest;
 import com.boomi.flow.external.storage.states.State;
 import com.google.common.io.Resources;
+import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
@@ -17,6 +19,7 @@ import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.client.Client;
@@ -34,14 +37,14 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
+@ExtendWith(JdbiParameterResolver.class)
 public class SaveStateTest extends BaseTest {
+
     @Test
-    public void testUpdateState() throws URISyntaxException, IOException, JoseException, JSONException {
+    public void testUpdateState(Jdbi jdbi) throws URISyntaxException, IOException, JoseException, JSONException {
         OffsetDateTime createdAt = OffsetDateTime.now();
         OffsetDateTime updatedAt = OffsetDateTime.now().plusDays(1);
         String oldContent = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
-
-        var jdbi = createJdbi();
 
         //insert an state
         jdbi.useHandle(handle -> handle.createUpdate(CommonStateTest.insertState())

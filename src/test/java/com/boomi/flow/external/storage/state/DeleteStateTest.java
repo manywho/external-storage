@@ -1,6 +1,7 @@
 package com.boomi.flow.external.storage.state;
 
 import com.boomi.flow.external.storage.BaseTest;
+import com.boomi.flow.external.storage.JdbiParameterResolver;
 import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.Resources;
@@ -8,6 +9,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jose4j.lang.JoseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -22,16 +24,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@ExtendWith(JdbiParameterResolver.class)
 public class DeleteStateTest extends BaseTest {
 
     @Test
-    public void testDeleteState() throws URISyntaxException, IOException, JoseException {
+    public void testDeleteState(Jdbi jdbi) throws URISyntaxException, IOException, JoseException {
         String validStateString = new String(Files.readAllBytes(Paths.get(Resources.getResource("state/state.json").toURI())));
 
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
 
-        Jdbi jdbi = createJdbi();
         CommonStateTest.cleanSates(jdbi);
 
         jdbi.useHandle(handle -> {

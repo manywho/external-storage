@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manywho.sdk.api.jackson.ObjectMapperFactory;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.util.PortProvider;
-import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -44,10 +43,6 @@ public class BaseTest {
     @AfterAll
     public static void stopServer() {
         server.stop();
-    }
-
-    public Jdbi createJdbi() {
-        return Jdbi.create(System.getenv("DATABASE_URL"), System.getenv("DATABASE_USERNAME"), System.getenv("DATABASE_PASSWORD"));
     }
 
     protected static String createRequestSignature(UUID tenant, String endpoint) throws JoseException {
