@@ -132,7 +132,7 @@ public class SaveStateTest extends BaseTest {
 
 
     @Test
-    public void testInsertState() throws URISyntaxException, IOException, JoseException, JSONException {
+    public void testInsertState(Jdbi jdbi) throws URISyntaxException, IOException, JoseException, JSONException {
 
         OffsetDateTime createdAd = OffsetDateTime.now();
         OffsetDateTime updatedAt = OffsetDateTime.now().plusDays(1);
@@ -179,7 +179,6 @@ public class SaveStateTest extends BaseTest {
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
 
-        var jdbi = createJdbi();
 
         Optional<State> stateOptional = jdbi.withHandle(handle -> {
             if (databaseType().equals("mysql")) {
