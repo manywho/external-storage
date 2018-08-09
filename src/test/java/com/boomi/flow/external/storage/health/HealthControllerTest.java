@@ -11,7 +11,11 @@ public class HealthControllerTest extends BaseTest {
     @Test
     public void testHealthCheck() {
         String url = testUrl("/health");
-        Response response = client.target(url).request().get();
+        Response response = client
+                .target(url)
+                .request()
+                .get();
+        
         Assertions.assertEquals(200, response.getStatus());
         response.close();
     }
