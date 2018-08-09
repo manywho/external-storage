@@ -15,6 +15,7 @@ public class HealthControllerTest extends BaseTest {
         String url = testUrl("/health");
         Client client = ClientBuilder.newClient();
         Response response = client.target(url).request().get();
+        response.close();
         Assertions.assertEquals(200, response.getStatus());
     }
 }

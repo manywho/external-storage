@@ -76,6 +76,7 @@ public class DeleteStateTest extends BaseTest {
             Assertions.assertEquals(0, numberOfStates);
                 }
         );
+        response.close();
 
         CommonStateTest.cleanSates(jdbi);
     }
@@ -101,6 +102,7 @@ public class DeleteStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(401, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -125,6 +127,7 @@ public class DeleteStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(400, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -148,5 +151,6 @@ public class DeleteStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(400, response.getStatus());
+        response.close();
     }
 }

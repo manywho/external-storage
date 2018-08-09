@@ -84,6 +84,7 @@ public class FindStateTest extends BaseTest {
                 .get();
         client.close();
         Assertions.assertEquals(401, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -104,6 +105,7 @@ public class FindStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(401, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -124,6 +126,7 @@ public class FindStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(400, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -144,5 +147,6 @@ public class FindStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(400, response.getStatus());
+        response.close();
     }
 }

@@ -136,6 +136,7 @@ public class SaveStateTest extends BaseTest {
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
+        response.close();
 
         CommonStateTest.cleanSates(jdbi);
     }
@@ -227,6 +228,7 @@ public class SaveStateTest extends BaseTest {
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
+        response.close();
 
         CommonStateTest.cleanSates(jdbi);
     }
@@ -311,6 +313,7 @@ public class SaveStateTest extends BaseTest {
                 .post(validEntity());
         client.close();
         Assertions.assertEquals(401, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -327,6 +330,7 @@ public class SaveStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(401, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -344,6 +348,7 @@ public class SaveStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(400, response.getStatus());
+        response.close();
     }
 
     @Test
@@ -361,6 +366,7 @@ public class SaveStateTest extends BaseTest {
         client.close();
 
         Assertions.assertEquals(400, response.getStatus());
+        response.close();
     }
 
     private Entity<String> validEntity() throws IOException, JoseException, URISyntaxException {
