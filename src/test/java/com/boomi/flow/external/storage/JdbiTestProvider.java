@@ -22,7 +22,7 @@ public class JdbiTestProvider implements Provider<Jdbi> {
             hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
             hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
             hikariConfig.setJdbcUrl(Environment.get("DATABASE_URL"));
-            hikariConfig.setMaximumPoolSize(1);
+            hikariConfig.setMaximumPoolSize(10);
             HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
 
             jdbi = Jdbi.create(hikariDataSource);

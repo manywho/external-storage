@@ -12,7 +12,7 @@ public class HealthControllerTest extends BaseTest {
     public void testHealthCheck() {
         String url = testUrl("/health");
         Response response = client.target(url).request().get();
-        response.close();
         Assertions.assertEquals(200, response.getStatus());
+        response.close();
     }
 }

@@ -1,7 +1,6 @@
 package com.boomi.flow.external.storage.state.utils;
 
 import com.boomi.flow.external.storage.BaseTest;
-import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import org.jdbi.v3.core.Jdbi;
 
 public class CommonStateTest {
@@ -23,12 +22,8 @@ public class CommonStateTest {
     public static void cleanSates(Jdbi jdbi) {
 
         String sqlDelete = "DELETE FROM states";
-        jdbi.withHandle(handle -> {
-            if (BaseTest.databaseType().equals("mysql")) {
-                handle.registerArgument(new UuidArgumentFactory());
-            }
-
-            return handle.createUpdate(sqlDelete)
+        jdbi.useHandle(handle -> {
+            handle.createUpdate(sqlDelete)
                     .execute();
         });
     }
