@@ -3,6 +3,7 @@ package com.boomi.flow.external.storage;
 import com.boomi.flow.external.storage.utils.Environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manywho.sdk.api.jackson.ObjectMapperFactory;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.util.PortProvider;
 import org.jose4j.jwa.AlgorithmConstraints;
@@ -18,6 +19,7 @@ import org.jose4j.lang.JoseException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
+import javax.ws.rs.client.Client;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -32,12 +34,17 @@ import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA
 public class BaseTest {
     protected static ObjectMapper objectMapper = ObjectMapperFactory.create();
     protected static UndertowJaxrsServer server;
+    protected static Client client;
 
     @BeforeAll
     public static void startServer() {
+        ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
+        clientBuilder.connectionPoolSize(10);
+
+        client  = clientBuilder.build();
         server = new UndertowJaxrsServer();
         server.start();
-        server.deploy(ApplicationTest.class);
+        server.deploy(new ApplicationTest());
     }
 
     @AfterAll

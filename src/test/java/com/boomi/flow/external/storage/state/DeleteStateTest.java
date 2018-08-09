@@ -13,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -58,13 +56,11 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Client client = ClientBuilder.newClient();
         Response response = client.target(uri).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
                 .method("DELETE", entity);
-        client.close();
 
         Assertions.assertEquals(204, response.getStatus());
 
@@ -92,14 +88,12 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Client client = ClientBuilder.newClient();
         Response response = client.target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .accept(MediaType.APPLICATION_JSON)
                 .method("DELETE", entity);
-        client.close();
 
         Assertions.assertEquals(401, response.getStatus());
         response.close();
@@ -116,15 +110,12 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Client client = ClientBuilder.newClient();
-
-        Response response = client.target(uri)
+        Response response =  client.target(uri)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
                 .accept(MediaType.APPLICATION_JSON)
                 .method("DELETE", entity);
-        client.close();
 
         Assertions.assertEquals(400, response.getStatus());
         response.close();
@@ -141,14 +132,12 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Client client = ClientBuilder.newClient();
         Response response = client.target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
                 .accept(MediaType.APPLICATION_JSON)
                 .method("DELETE", entity);
-        client.close();
 
         Assertions.assertEquals(400, response.getStatus());
         response.close();

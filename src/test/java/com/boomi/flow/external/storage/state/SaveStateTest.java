@@ -24,8 +24,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -89,14 +87,11 @@ public class SaveStateTest extends BaseTest {
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
-        Client client = ClientBuilder.newClient();
-
         Response response = client.target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .post(entity);
-        client.close();
 
         Assertions.assertEquals(204, response.getStatus());
 
@@ -176,14 +171,11 @@ public class SaveStateTest extends BaseTest {
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
-        Client client = ClientBuilder.newClient();
-
         Response response = client.target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .post(entity);
-        client.close();
 
         Assertions.assertEquals(204, response.getStatus());
 
@@ -302,8 +294,6 @@ public class SaveStateTest extends BaseTest {
     public void testNotValidSignature() throws IOException, JoseException, URISyntaxException {
         String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
 
-        Client client = ClientBuilder.newClient();
-
         Response response = client.target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -311,7 +301,7 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Signature", "not valid signature")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
-        client.close();
+
         Assertions.assertEquals(401, response.getStatus());
         response.close();
     }
@@ -320,14 +310,12 @@ public class SaveStateTest extends BaseTest {
     public void testEmptySignature() throws JoseException, IOException, URISyntaxException {
         String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
 
-        Client client = ClientBuilder.newClient();
         Response response = client.target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
-        client.close();
 
         Assertions.assertEquals(401, response.getStatus());
         response.close();
@@ -337,7 +325,6 @@ public class SaveStateTest extends BaseTest {
     public void testNonPlatformKey() throws JoseException, IOException, URISyntaxException {
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
-        Client client = ClientBuilder.newClient();
 
         Response response = client.target(url)
                 .request()
@@ -345,7 +332,6 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
-        client.close();
 
         Assertions.assertEquals(400, response.getStatus());
         response.close();
@@ -356,14 +342,12 @@ public class SaveStateTest extends BaseTest {
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
 
-        Client client = ClientBuilder.newClient();
         Response response = client.target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
-        client.close();
 
         Assertions.assertEquals(400, response.getStatus());
         response.close();
