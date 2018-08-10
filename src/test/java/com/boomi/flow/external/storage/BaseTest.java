@@ -6,6 +6,7 @@ import com.manywho.sdk.api.jackson.ObjectMapperFactory;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.util.PortProvider;
+import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwk.PublicJsonWebKey;
 import org.jose4j.jws.AlgorithmIdentifiers;
@@ -16,8 +17,8 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 import javax.ws.rs.client.Client;
 import java.net.MalformedURLException;
@@ -35,11 +36,13 @@ public class BaseTest {
     protected static ObjectMapper objectMapper = ObjectMapperFactory.create();
     protected static UndertowJaxrsServer server;
     protected static Client client;
+    protected static Jdbi jdbi;
 
-    @BeforeAll
+    @BeforeClass
     public static void startServer() {
         ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
         clientBuilder.connectionPoolSize(10);
+        jdbi = new JdbiTestProvider().get();
 
         client  = clientBuilder.build();
         server = new UndertowJaxrsServer();
@@ -47,7 +50,7 @@ public class BaseTest {
         server.deploy(new ApplicationTest());
     }
 
-    @AfterAll
+    @AfterClass
     public static void stopServer() {
         server.stop();
     }

@@ -1,13 +1,11 @@
 package com.boomi.flow.external.storage.state;
 
 import com.boomi.flow.external.storage.BaseTest;
-import com.boomi.flow.external.storage.JdbiParameterResolver;
 import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.boomi.flow.external.storage.state.utils.StateRequest;
 import com.boomi.flow.external.storage.states.State;
 import com.google.common.io.Resources;
-import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
@@ -17,11 +15,8 @@ import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.client.Entity;
@@ -37,17 +32,7 @@ import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
-@ExtendWith(JdbiParameterResolver.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SaveStateTest extends BaseTest {
-    private static Jdbi jdbi;
-
-    @BeforeAll
-    public static void beforeAll(Jdbi jdbiParam) {
-        jdbi = jdbiParam;
-    }
-
-
     @Test
     public void testUpdateState() throws URISyntaxException, IOException, JoseException, JSONException {
         OffsetDateTime createdAt = OffsetDateTime.now();
@@ -93,7 +78,7 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .post(entity);
 
-        Assertions.assertEquals(204, response.getStatus());
+        Assert.assertEquals(204, response.getStatus());
 
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
@@ -110,24 +95,24 @@ public class SaveStateTest extends BaseTest {
                     .findFirst();
         });
 
-        Assertions.assertTrue(stateOptional.isPresent());
-        Assertions.assertEquals(stateId, stateOptional.get().getId());
-        Assertions.assertEquals(tenantId, stateOptional.get().getTenantId());
-        Assertions.assertNull(stateOptional.get().getParentId());
-        Assertions.assertEquals(flowId, stateOptional.get().getFlowId());
-        Assertions.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
+        Assert.assertTrue(stateOptional.isPresent());
+        Assert.assertEquals(stateId, stateOptional.get().getId());
+        Assert.assertEquals(tenantId, stateOptional.get().getTenantId());
+        Assert.assertNull(stateOptional.get().getParentId());
+        Assert.assertEquals(flowId, stateOptional.get().getFlowId());
+        Assert.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
         // todo fix
         // Assert.assertTrue(stateOptional.get().isDone());
-        Assertions.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
+        Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
         // todo createJdbi assertion for createAt too
         if (databaseType().equals("mysql")) {
             Timestamp expectedUpdatedAtWithoutTimezone = Timestamp.valueOf(updatedAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updatedAtWithoutTimezone = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
 
-            Assertions.assertEquals(expectedUpdatedAtWithoutTimezone, updatedAtWithoutTimezone);
+            Assert.assertEquals(expectedUpdatedAtWithoutTimezone, updatedAtWithoutTimezone);
         } else {
-            Assertions.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
+            Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
@@ -177,7 +162,7 @@ public class SaveStateTest extends BaseTest {
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
                 .post(entity);
 
-        Assertions.assertEquals(204, response.getStatus());
+        Assert.assertEquals(204, response.getStatus());
 
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
@@ -195,15 +180,15 @@ public class SaveStateTest extends BaseTest {
                     .findFirst();
         });
 
-        Assertions.assertTrue(stateOptional.isPresent());
-        Assertions.assertEquals(stateId, stateOptional.get().getId());
-        Assertions.assertEquals(tenantId, stateOptional.get().getTenantId());
-        Assertions.assertEquals(parentId, stateOptional.get().getParentId());
-        Assertions.assertEquals(flowId, stateOptional.get().getFlowId());
-        Assertions.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
+        Assert.assertTrue(stateOptional.isPresent());
+        Assert.assertEquals(stateId, stateOptional.get().getId());
+        Assert.assertEquals(tenantId, stateOptional.get().getTenantId());
+        Assert.assertEquals(parentId, stateOptional.get().getParentId());
+        Assert.assertEquals(flowId, stateOptional.get().getFlowId());
+        Assert.assertEquals(flowVersionId, stateOptional.get().getFlowVersionId());
         // todo fix
         // Assert.assertTrue(stateOptional.get().isDone());
-        Assertions.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
+        Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
         if (databaseType().equals("mysql")) {
             Timestamp createdAtWithoutTimezone = Timestamp.valueOf(createdAd.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
@@ -212,11 +197,11 @@ public class SaveStateTest extends BaseTest {
             Timestamp created_at = Timestamp.valueOf(stateOptional.get().getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
             Timestamp updated_at = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
 
-            Assertions.assertEquals(createdAtWithoutTimezone, created_at);
-            Assertions.assertEquals(updatedAtWithoutTimezone, updated_at);
+            Assert.assertEquals(createdAtWithoutTimezone, created_at);
+            Assert.assertEquals(updatedAtWithoutTimezone, updated_at);
         } else {
-            Assertions.assertEquals(createdAd, stateOptional.get().getCreatedAt());
-            Assertions.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
+            Assert.assertEquals(createdAd, stateOptional.get().getCreatedAt());
+            Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
         }
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
@@ -302,7 +287,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
-        Assertions.assertEquals(401, response.getStatus());
+        Assert.assertEquals(401, response.getStatus());
         response.close();
     }
 
@@ -317,7 +302,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
-        Assertions.assertEquals(401, response.getStatus());
+        Assert.assertEquals(401, response.getStatus());
         response.close();
     }
 
@@ -333,7 +318,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
-        Assertions.assertEquals(400, response.getStatus());
+        Assert.assertEquals(400, response.getStatus());
         response.close();
     }
 
@@ -349,7 +334,7 @@ public class SaveStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
-        Assertions.assertEquals(400, response.getStatus());
+        Assert.assertEquals(400, response.getStatus());
         response.close();
     }
 

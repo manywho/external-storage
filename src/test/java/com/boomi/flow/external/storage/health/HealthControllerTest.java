@@ -1,8 +1,8 @@
 package com.boomi.flow.external.storage.health;
 
 import com.boomi.flow.external.storage.BaseTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 
@@ -15,8 +15,7 @@ public class HealthControllerTest extends BaseTest {
                 .target(url)
                 .request()
                 .get();
-        
-        Assertions.assertEquals(200, response.getStatus());
+        Assert.assertEquals(200, response.getStatus());
         response.close();
     }
 }

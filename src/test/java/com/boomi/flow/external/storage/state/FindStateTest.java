@@ -1,20 +1,15 @@
 package com.boomi.flow.external.storage.state;
 
 import com.boomi.flow.external.storage.BaseTest;
-import com.boomi.flow.external.storage.JdbiParameterResolver;
 import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.google.common.io.Resources;
-import org.jdbi.v3.core.Jdbi;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.lang.JoseException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import javax.ws.rs.core.MediaType;
@@ -25,15 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-@ExtendWith(JdbiParameterResolver.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FindStateTest extends BaseTest {
-    private static Jdbi jdbi;
-
-    @BeforeAll
-    public static void beforeAll(Jdbi jdbiParam) {
-        jdbi = jdbiParam;
-    }
 
     @Test
     public void testFindState() throws URISyntaxException, IOException, JSONException, JoseException, MalformedClaimException, InvalidJwtException {
@@ -78,7 +65,7 @@ public class FindStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 
-        Assertions.assertEquals(401, response.getStatus());
+        Assert.assertEquals(401, response.getStatus());
         response.close();
     }
 
@@ -97,7 +84,7 @@ public class FindStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 
-        Assertions.assertEquals(401, response.getStatus());
+        Assert.assertEquals(401, response.getStatus());
         response.close();
     }
 
@@ -116,7 +103,7 @@ public class FindStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 
-        Assertions.assertEquals(400, response.getStatus());
+        Assert.assertEquals(400, response.getStatus());
         response.close();
     }
 
@@ -134,7 +121,7 @@ public class FindStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 
-        Assertions.assertEquals(400, response.getStatus());
+        Assert.assertEquals(400, response.getStatus());
         response.close();
     }
 }
