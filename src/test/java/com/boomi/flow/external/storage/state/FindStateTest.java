@@ -3,6 +3,7 @@ package com.boomi.flow.external.storage.state;
 import com.boomi.flow.external.storage.BaseTest;
 import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.google.common.io.Resources;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jose4j.jwt.MalformedClaimException;
 import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.lang.JoseException;
@@ -35,7 +36,7 @@ public class FindStateTest extends BaseTest {
 
         String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
 
-        String stateEncrypted = client.target(uri)
+        String stateEncrypted = new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -57,7 +58,7 @@ public class FindStateTest extends BaseTest {
 
         String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
 
-        Response response = client.target(uri)
+        Response response = new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -77,7 +78,7 @@ public class FindStateTest extends BaseTest {
 
         String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
 
-        Response response = client.target(uri)
+        Response response = new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -96,7 +97,7 @@ public class FindStateTest extends BaseTest {
 
         String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
 
-        Response response = client.target(uri)
+        Response response = new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
@@ -114,7 +115,7 @@ public class FindStateTest extends BaseTest {
         UUID stateId = UUID.fromString("4b8b27d3-e4f3-4a78-8822-12476582af8a");
         String uri = testUrl(String.format("/states/%s/%s", tenantId.toString(), stateId.toString()));
 
-        Response response = client.target(uri)
+        Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))

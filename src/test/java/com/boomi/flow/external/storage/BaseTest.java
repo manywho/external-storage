@@ -21,6 +21,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -35,16 +36,11 @@ import static org.jose4j.jws.AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA
 public class BaseTest {
     protected static ObjectMapper objectMapper = ObjectMapperFactory.create();
     protected static UndertowJaxrsServer server;
-    protected static Client client;
     protected static Jdbi jdbi;
 
     @BeforeClass
     public static void startServer() {
-        ResteasyClientBuilder clientBuilder = new ResteasyClientBuilder();
-        clientBuilder.connectionPoolSize(10);
         jdbi = new JdbiTestProvider().get();
-
-        client  = clientBuilder.build();
         server = new UndertowJaxrsServer();
         server.start();
         server.deploy(new ApplicationTest());

@@ -1,6 +1,7 @@
 package com.boomi.flow.external.storage.health;
 
 import com.boomi.flow.external.storage.BaseTest;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -10,8 +11,9 @@ public class HealthControllerTest extends BaseTest {
 
     @Test
     public void testHealthCheck() {
+
         String url = testUrl("/health");
-        Response response = client
+        Response response = new ResteasyClientBuilder().build()
                 .target(url)
                 .request()
                 .get();

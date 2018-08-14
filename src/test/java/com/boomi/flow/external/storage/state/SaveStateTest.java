@@ -6,6 +6,7 @@ import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.boomi.flow.external.storage.state.utils.StateRequest;
 import com.boomi.flow.external.storage.states.State;
 import com.google.common.io.Resources;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
 import org.jose4j.jwe.JsonWebEncryption;
 import org.jose4j.jwe.KeyManagementAlgorithmIdentifiers;
@@ -72,7 +73,7 @@ public class SaveStateTest extends BaseTest {
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
-        Response response = client.target(url).request()
+        Response response =  new ResteasyClientBuilder().build().target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
@@ -156,7 +157,7 @@ public class SaveStateTest extends BaseTest {
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(requestList), MediaType.APPLICATION_JSON_TYPE);
 
-        Response response = client.target(url).request()
+        Response response =  new ResteasyClientBuilder().build().target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
@@ -279,7 +280,7 @@ public class SaveStateTest extends BaseTest {
     public void testNotValidSignature() throws IOException, JoseException, URISyntaxException {
         String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
 
-        Response response = client.target(url)
+        Response response =  new ResteasyClientBuilder().build().target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -295,7 +296,7 @@ public class SaveStateTest extends BaseTest {
     public void testEmptySignature() throws JoseException, IOException, URISyntaxException {
         String url = testUrl("/states/4b8b27d3-e4f3-4a78-8822-12476582af8a");
 
-        Response response = client.target(url)
+        Response response =  new ResteasyClientBuilder().build().target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -311,7 +312,7 @@ public class SaveStateTest extends BaseTest {
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
 
-        Response response = client.target(url)
+        Response response =  new ResteasyClientBuilder().build().target(url)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
@@ -327,7 +328,7 @@ public class SaveStateTest extends BaseTest {
         UUID tenantId = UUID.fromString("918f5a24-290e-4659-9cd6-c8d95aee92c6");
         String url = testUrl("/states/918f5a24-290e-4659-9cd6-c8d95aee92c6");
 
-        Response response = client.target(url)
+        Response response =  new ResteasyClientBuilder().build().target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))

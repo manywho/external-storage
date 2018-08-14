@@ -4,6 +4,7 @@ import com.boomi.flow.external.storage.BaseTest;
 import com.boomi.flow.external.storage.state.utils.CommonStateTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.Resources;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jose4j.lang.JoseException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Response response = client.target(uri).request()
+        Response response =  new ResteasyClientBuilder().build().target(uri).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
@@ -76,7 +77,7 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Response response = client.target(uri)
+        Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
@@ -98,7 +99,7 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Response response =  client.target(uri)
+        Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
@@ -120,7 +121,7 @@ public class DeleteStateTest extends BaseTest {
         String uri = testUrl(String.format("/states/%s", tenantId.toString()));
         Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(uuids), MediaType.APPLICATION_JSON_TYPE);
 
-        Response response = client.target(uri)
+        Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
