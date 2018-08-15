@@ -12,12 +12,11 @@ import javax.inject.Singleton;
 
 public class ApplicationTest extends Servlet3Server {
 
-    public ApplicationTest() {
-
+    public ApplicationTest(Jdbi jdbiSchema) {
         this.addModule(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(Jdbi.class).toProvider(JdbiTestProvider.class).in(Singleton.class);
+                bind(Jdbi.class).toInstance(jdbiSchema);
                 bind(KeyRepository.class).toProvider(KeyRepositoryProvider.class).in(Singleton.class);
                 bind(StateRepository.class).toProvider(StateRepositoryProvider.class).in(Singleton.class);
             }
