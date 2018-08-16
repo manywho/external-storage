@@ -1,1 +1,0 @@
-ALTER TABLE states ADD COLLUMN expires_at timestamp with time zone;
