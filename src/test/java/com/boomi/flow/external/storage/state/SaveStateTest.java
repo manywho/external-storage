@@ -241,7 +241,6 @@ public class SaveStateTest extends BaseTest {
         String sql = "SELECT id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, expires_at, content " +
                 "FROM states WHERE id = :id AND tenant_id = :tenant";
 
-
         Optional<State> stateOptional = jdbi.withHandle(handle -> {
             if (databaseType().equals("mysql")) {
                 handle.registerArgument(new UuidArgumentFactory());
