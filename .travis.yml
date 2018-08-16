@@ -2,8 +2,6 @@ language: java
 jdk:
   - oraclejdk10
   - openjdk10
-  - oraclejdk11
-  - openjdk11
 env:
   matrix:
     - DATABASE_URL=$DATABASE_URL_POSTGRES DATABASE_PASSWORD=$DATABASE_PASSWORD_POSTGRES
