@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,14 +62,6 @@ public class SaveStateTest extends BaseTest {
         UUID currentUserId = UUID.fromString("52df1a90-3826-4508-b7c2-cde8aa5b72cf");
         UUID flowVersionId = UUID.fromString("f8bfd40b-8e0b-4966-884e-ed6159aec3dc");
         UUID parentId = UUID.fromString("dfcf84e6-85de-11e8-adc0-fa7ae01bbebc");
-
-        if (databaseType().equals("mysql")) {
-            // my sql doesn't save the nanoseconds, also seems to truncate with a round up or round down,
-            // I have set nano to 0 to avoid problems for now
-            createdAt = createdAt.withNano(0);
-            updatedAt = updatedAt.withNano(0);
-            expiresAt = expiresAt.withNano(0);
-        }
 
         // you can find examples of the following keys at test/resources/example-key
         PublicJsonWebKey platformFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
@@ -118,14 +108,8 @@ public class SaveStateTest extends BaseTest {
         Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
 
         // todo createJdbi assertion for createAt too
-        if (databaseType().equals("mysql")) {
-            Timestamp expectedUpdatedAtWithoutTimezone = Timestamp.valueOf(updatedAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-            Timestamp updatedAtWithoutTimezone = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-            Assert.assertEquals(expectedUpdatedAtWithoutTimezone, updatedAtWithoutTimezone);
-        } else {
-            Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
-            Assert.assertEquals(expiresAt, stateOptional.get().getExpiresAt());
-        }
+        Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
+        Assert.assertEquals(expiresAt, stateOptional.get().getExpiresAt());
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
         response.close();
@@ -141,7 +125,7 @@ public class SaveStateTest extends BaseTest {
      *
      */
     @Test
-    public void testNotUpdateState() throws URISyntaxException, IOException, JoseException, JSONException {
+    public void testNotUpdateState() throws URISyntaxException, IOException, JoseException {
         String schema = attachRandomString("updatestate");
         createSchema(schema);
         Migrator.executeMigrations(dataSource(schema));
@@ -169,14 +153,6 @@ public class SaveStateTest extends BaseTest {
         UUID currentUserId = UUID.fromString("52df1a90-3826-4508-b7c2-cde8aa5b72cf");
         UUID flowVersionId = UUID.fromString("f8bfd40b-8e0b-4966-884e-ed6159aec3dc");
         UUID parentId = UUID.fromString("dfcf84e6-85de-11e8-adc0-fa7ae01bbebc");
-
-        if (databaseType().equals("mysql")) {
-            // my sql doesn't save the nanoseconds, also seems to truncate with a round up or round down,
-            // I have set nano to 0 to avoid problems for now
-            createdAt = createdAt.withNano(0);
-            updatedAt = updatedAt.withNano(0);
-            expiresAt = expiresAt.withNano(0);
-        }
 
         // you can find examples of the following keys at test/resources/example-key
         PublicJsonWebKey platformFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
@@ -242,14 +218,6 @@ public class SaveStateTest extends BaseTest {
         UUID flowVersionId = UUID.fromString("f8bfd40b-8e0b-4966-884e-ed6159aec3dc");
         UUID parentId = UUID.fromString("dfcf84e6-85de-11e8-adc0-fa7ae01bbebc");
 
-        if (databaseType().equals("mysql")) {
-            // my sql doesn't save the nanoseconds, also seems to truncate with a round up or round down,
-            // I have set nano to 0 to avoid problems for now
-            createdAd = createdAd.withNano(0);
-            updatedAt = updatedAt.withNano(0);
-            expiresAt = expiresAt.withNano(0);
-        }
-
         // you can find examples of the following keys at test/resources/example-key
         PublicJsonWebKey platformFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
         PublicJsonWebKey receiverFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
@@ -295,24 +263,9 @@ public class SaveStateTest extends BaseTest {
         // todo fix
         // Assert.assertTrue(stateOptional.get().isDone());
         Assert.assertEquals(currentMapElementId, stateOptional.get().getCurrentMapElementId());
-
-        if (databaseType().equals("mysql")) {
-            Timestamp createdAtWithoutTimezone = Timestamp.valueOf(createdAd.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-            Timestamp updatedAtWithoutTimezone = Timestamp.valueOf(updatedAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-            Timestamp expiresAtWithoutTimezone = Timestamp.valueOf(expiresAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-
-            Timestamp created_at = Timestamp.valueOf(stateOptional.get().getCreatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-            Timestamp updated_at = Timestamp.valueOf(stateOptional.get().getUpdatedAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-            Timestamp expires_at = Timestamp.valueOf(stateOptional.get().getExpiresAt().atZoneSameInstant(ZoneOffset.UTC).toLocalDateTime());
-
-            Assert.assertEquals(createdAtWithoutTimezone, created_at);
-            Assert.assertEquals(updatedAtWithoutTimezone, updated_at);
-            Assert.assertEquals(expiresAtWithoutTimezone, expires_at);
-        } else {
-            Assert.assertEquals(createdAd, stateOptional.get().getCreatedAt());
-            Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
-            Assert.assertEquals(expiresAt, stateOptional.get().getExpiresAt());
-        }
+        Assert.assertEquals(createdAd, stateOptional.get().getCreatedAt());
+        Assert.assertEquals(updatedAt, stateOptional.get().getUpdatedAt());
+        Assert.assertEquals(expiresAt, stateOptional.get().getExpiresAt());
 
         JSONAssert.assertEquals(content, stateOptional.get().getContent(), false);
         response.close();

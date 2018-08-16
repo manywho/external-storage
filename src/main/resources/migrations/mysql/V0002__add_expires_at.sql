@@ -1,1 +1,1 @@
-ALTER TABLE states ADD expires_at datetime;
+ALTER TABLE states ADD expires_at datetime(6);
