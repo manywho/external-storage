@@ -22,6 +22,7 @@ public class PostgresqlStateDatabaseRepository extends StateDatabaseRepository {
                 .bind("content", state.getContent())
                 .bind("createdAt", state.getCreatedAt())
                 .bind("updatedAt", state.getUpdatedAt())
+                .bind("expiresAt", state.getExpiresAt())
                 .add();
     }
 

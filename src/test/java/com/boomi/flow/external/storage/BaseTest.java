@@ -53,7 +53,7 @@ public class BaseTest {
 
         HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
         Jdbi jdbi = Jdbi.create(hikariDataSource);
-        jdbi.useHandle(handle -> handle.execute("CREATE SCHEMA " + schema ));
+        jdbi.useHandle(handle -> handle.execute("CREATE SCHEMA " + schema));
     }
 
     protected void deleteSchema(String schema) {
