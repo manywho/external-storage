@@ -3,14 +3,20 @@ jdk:
   - oraclejdk10
   - openjdk10
 services:
-  - mysql
-before_install:
-  - mysql -e 'create database external_storage;'
+  - docker
 env:
   matrix:
     - DATABASE_URL=$DATABASE_URL_POSTGRES DATABASE_PASSWORD=$DATABASE_PASSWORD_POSTGRES
-    - DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD=''
     - DATABASE_URL=$DATABASE_URL_MSSQL DATABASE_PASSWORD=$DATABASE_PASSWORD_MSSQL
+jobs:
+  include:
+   - jdk: oraclejdk10 and MySql
+     env: DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD='root'
+     script: sudo docker run -d --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=external_storage mysql:8
+   - jdk: openjdk10 and MySql
+     env: DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD='root'
+     script: sudo docker run -d --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=external_storage mysql:8
+
 cache:
   directories:
     - "$HOME/.m2"
