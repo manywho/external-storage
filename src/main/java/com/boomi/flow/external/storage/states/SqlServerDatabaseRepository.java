@@ -21,22 +21,22 @@ public class SqlServerDatabaseRepository extends StateDatabaseRepository {
                 .bind("currentMapElement", state.getCurrentMapElementId())
                 .bind("currentUser", state.getCurrentUserId())
                 .bind("content", state.getContent())
-                .bind("createdAt", state.getCreatedAt().toString())
-                .bind("updatedAt", state.getUpdatedAt().toString())
-                .bind("expiresAt", state.getExpiresAt().toString())
+                .bind("createdAt", state.getCreatedAt())
+                .bind("updatedAt", state.getUpdatedAt())
+                .bind("expiresAt", state.getExpiresAt())
                 .add();
     }
 
     @Override
     protected String upsertQuery() {
-        return ("MERGE states WITH (HOLDLOCK) AS myTarget " +
-                "  USING (SELECT :id id, :tenant tenant_id, :parent parent_id, :flow flow_id, :flowVersion flow_version_id, :isDone is_done, :currentMapElement current_map_element_id, :currentUser current_user_id, :createdAt created_at, :updatedAt updated_at, :expiresAt expires_at, :content content) AS mySource " +
-                "    ON mySource.id = myTarget.id  and mySource.id=:id " +
-                "WHEN MATCHED and myTarget.updated_at <= mySource.updated_at THEN UPDATE " +
-                "    SET flow_id =mySource.flow_id, flow_version_id =mySource.flow_version_id, is_done =mySource.is_done, current_map_element_id=mySource.current_map_element_id, current_user_id = mySource.current_user_id, updated_at =mySource.updated_at, expires_at=mySource.expires_at, content=mySource.content " +
+        return ("MERGE states WITH (HOLDLOCK) AS oldState " +
+                "  USING (SELECT :id id, :tenant tenant_id, :parent parent_id, :flow flow_id, :flowVersion flow_version_id, :isDone is_done, :currentMapElement current_map_element_id, :currentUser current_user_id, :createdAt created_at, :updatedAt updated_at, :expiresAt expires_at, :content content) AS newState " +
+                "    ON newState.id = oldState.id  and newState.id = :id " +
+                "WHEN MATCHED and oldState.updated_at <= newState.updated_at THEN UPDATE " +
+                "    SET flow_id = newState.flow_id, flow_version_id = newState.flow_version_id, is_done = newState.is_done, current_map_element_id = newState.current_map_element_id, current_user_id = newState.current_user_id, updated_at = newState.updated_at, expires_at=newState.expires_at, content = newState.content " +
                 "WHEN NOT MATCHED THEN " +
                 "    INSERT (id, tenant_id, parent_id, flow_id, flow_version_id, is_done, current_map_element_id, current_user_id, created_at, updated_at, expires_at, content) " +
-                "    VALUES (mySource.id, mySource.tenant_id, mySource.parent_id, mySource.flow_id, mySource.flow_version_id, mySource.is_done, mySource.current_map_element_id, mySource.current_user_id, mySource.created_at, mySource.updated_at, mySource.expires_at, mySource.content); ");
+                "    VALUES (newState.id, newState.tenant_id, newState.parent_id, newState.flow_id, newState.flow_version_id, newState.is_done, newState.current_map_element_id, newState.current_user_id, newState.created_at, newState.updated_at, newState.expires_at, newState.content); ");
 
     }
 }
