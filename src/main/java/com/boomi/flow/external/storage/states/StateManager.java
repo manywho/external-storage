@@ -2,6 +2,7 @@ package com.boomi.flow.external.storage.states;
 
 import com.boomi.flow.external.storage.keys.PlatformKeyResolver;
 import com.boomi.flow.external.storage.keys.ReceiverKeyResolver;
+import com.manywho.sdk.services.utils.UUIDs;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
 import org.jose4j.jwe.ContentEncryptionAlgorithmIdentifiers;
@@ -127,19 +128,18 @@ public class StateManager {
             }
 
             State state = new State();
-
             try {
                 // Set the properties of the metadata we want to store, using the decoded and verified token's claims
                 state.setContent(claims.getStringClaimValue("content"));
                 state.setCreatedAt(OffsetDateTime.parse(claims.getStringClaimValue("createdAt")));
-                state.setCurrentMapElementId(uuidFromNullableString(claims.getStringClaimValue("currentMapElement")));
-                state.setCurrentUserId(uuidFromNullableString(claims.getStringClaimValue("currentUser")));
+                state.setCurrentMapElementId(UUIDs.fromNullableString(claims.getStringClaimValue("currentMapElement")));
+                state.setCurrentUserId(UUIDs.fromNullableString(claims.getStringClaimValue("currentUser")));
                 state.setDone(claims.getClaimValue("isDone", Boolean.class));
-                state.setFlowId(uuidFromNullableString(claims.getStringClaimValue("flow")));
-                state.setFlowVersionId(uuidFromNullableString(claims.getStringClaimValue("flowVersion")));
-                state.setId(uuidFromNullableString(claims.getStringClaimValue("id")));
-                state.setParentId(uuidFromNullableString(claims.getStringClaimValue("parent")));
-                state.setTenantId(uuidFromNullableString(claims.getStringClaimValue("tenant")));
+                state.setFlowId(UUIDs.fromNullableString(claims.getStringClaimValue("flow")));
+                state.setFlowVersionId(UUIDs.fromNullableString(claims.getStringClaimValue("flowVersion")));
+                state.setId(UUIDs.fromNullableString(claims.getStringClaimValue("id")));
+                state.setParentId(UUIDs.fromNullableString(claims.getStringClaimValue("parent")));
+                state.setTenantId(UUIDs.fromNullableString(claims.getStringClaimValue("tenant")));
                 state.setToken(stateRequest.getToken());
                 state.setUpdatedAt(OffsetDateTime.parse(claims.getStringClaimValue("updatedAt")));
                 state.setExpiresAt(OffsetDateTime.parse(claims.getStringClaimValue("expiresAt")));
@@ -151,14 +151,5 @@ public class StateManager {
         }
 
         repository.save(tenant, states);
-    }
-
-    // TODO: Move this to the SDK
-    private static UUID uuidFromNullableString(String value) {
-        if (value == null) {
-            return null;
-        }
-
-        return UUID.fromString(value);
     }
 }

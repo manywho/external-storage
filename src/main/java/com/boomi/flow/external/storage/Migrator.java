@@ -1,6 +1,6 @@
 package com.boomi.flow.external.storage;
 
-import com.boomi.flow.external.storage.utils.Environment;
+import com.manywho.sdk.services.utils.Environment;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
 
@@ -13,9 +13,9 @@ public class Migrator {
         flyway.setDataSource(dataSource);
 
         // possible supported values for path are mysql, postgresql and sqlserver
-        var databaseUrl = System.getenv("JDBC_DATABASE_URL");
+        var databaseUrl = Environment.get("JDBC_DATABASE_URL");
         if (databaseUrl == null) {
-            databaseUrl = Environment.get("DATABASE_URL");
+            databaseUrl = Environment.getRequired("DATABASE_URL");
         }
 
         String path = URI.create(databaseUrl.trim().substring(5)).getScheme();

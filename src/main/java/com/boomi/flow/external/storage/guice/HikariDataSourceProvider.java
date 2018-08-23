@@ -1,6 +1,6 @@
 package com.boomi.flow.external.storage.guice;
 
-import com.boomi.flow.external.storage.utils.Environment;
+import com.manywho.sdk.services.utils.Environment;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -16,9 +16,9 @@ public class HikariDataSourceProvider implements Provider<HikariDataSource> {
         if (jdbcDatabaseUrl != null) {
             hikariConfig.setJdbcUrl(System.getenv("JDBC_DATABASE_URL"));
         } else {
-            hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
-            hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
-            hikariConfig.setJdbcUrl(Environment.get("DATABASE_URL"));
+            hikariConfig.setPassword(Environment.getRequired("DATABASE_PASSWORD"));
+            hikariConfig.setUsername(Environment.getRequired("DATABASE_USERNAME"));
+            hikariConfig.setJdbcUrl(Environment.getRequired("DATABASE_URL"));
         }
 
         return new HikariDataSource(hikariConfig);

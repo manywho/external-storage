@@ -1,7 +1,7 @@
 package com.boomi.flow.external.storage;
 
-import com.boomi.flow.external.storage.utils.Environment;
 import com.google.inject.Provider;
+import com.manywho.sdk.services.utils.Environment;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jdbi.v3.core.Jdbi;
@@ -19,9 +19,9 @@ public class JdbiTestProvider implements Provider<Jdbi> {
     public Jdbi get() {
         if (jdbi == null) {
             HikariConfig hikariConfig = new HikariConfig();
-            hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
-            hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
-            hikariConfig.setJdbcUrl(Environment.get("DATABASE_URL"));
+            hikariConfig.setPassword(Environment.getRequired("DATABASE_PASSWORD"));
+            hikariConfig.setUsername(Environment.getRequired("DATABASE_USERNAME"));
+            hikariConfig.setJdbcUrl(Environment.getRequired("DATABASE_URL"));
             hikariConfig.setMaximumPoolSize(10);
             HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
 

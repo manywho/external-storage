@@ -1,8 +1,8 @@
 package com.boomi.flow.external.storage;
 
-import com.boomi.flow.external.storage.utils.Environment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.manywho.sdk.api.jackson.ObjectMapperFactory;
+import com.manywho.sdk.services.utils.Environment;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
@@ -18,6 +18,7 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -35,9 +36,9 @@ public class BaseTest {
 
     protected HikariDataSource dataSource(String schema) {
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
-        hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
-        hikariConfig.setJdbcUrl(Environment.get("DATABASE_URL"));
+        hikariConfig.setPassword(Environment.getRequired("DATABASE_PASSWORD"));
+        hikariConfig.setUsername(Environment.getRequired("DATABASE_USERNAME"));
+        hikariConfig.setJdbcUrl(Environment.getRequired("DATABASE_URL"));
         hikariConfig.setMaximumPoolSize(1);
         hikariConfig.setSchema(schema);
 
@@ -46,9 +47,9 @@ public class BaseTest {
 
     protected void createSchema(String schema) {
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
-        hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
-        hikariConfig.setJdbcUrl(Environment.get("DATABASE_URL"));
+        hikariConfig.setPassword(Environment.getRequired("DATABASE_PASSWORD"));
+        hikariConfig.setUsername(Environment.getRequired("DATABASE_USERNAME"));
+        hikariConfig.setJdbcUrl(Environment.getRequired("DATABASE_URL"));
         hikariConfig.setMaximumPoolSize(1);
 
         HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);
@@ -58,9 +59,9 @@ public class BaseTest {
 
     protected void deleteSchema(String schema) {
         HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setPassword(Environment.get("DATABASE_PASSWORD"));
-        hikariConfig.setUsername(Environment.get("DATABASE_USERNAME"));
-        hikariConfig.setJdbcUrl(Environment.get("DATABASE_URL"));
+        hikariConfig.setPassword(Environment.getRequired("DATABASE_PASSWORD"));
+        hikariConfig.setUsername(Environment.getRequired("DATABASE_USERNAME"));
+        hikariConfig.setJdbcUrl(Environment.getRequired("DATABASE_URL"));
         hikariConfig.setMaximumPoolSize(1);
 
         HikariDataSource hikariDataSource = new HikariDataSource(hikariConfig);

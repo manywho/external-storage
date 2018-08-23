@@ -1,12 +1,12 @@
 package com.boomi.flow.external.storage.guice;
 
+import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import com.boomi.flow.external.storage.states.MySqlStateDatabaseRepository;
 import com.boomi.flow.external.storage.states.PostgresqlStateDatabaseRepository;
 import com.boomi.flow.external.storage.states.SqlServerDatabaseRepository;
 import com.boomi.flow.external.storage.states.StateRepository;
-import com.boomi.flow.external.storage.utils.Environment;
-import com.boomi.flow.external.storage.jdbi.UuidArgumentFactory;
 import com.google.inject.Provider;
+import com.manywho.sdk.services.utils.Environment;
 import org.jdbi.v3.core.Jdbi;
 
 import javax.inject.Inject;
@@ -23,9 +23,9 @@ public class StateRepositoryProvider implements Provider<StateRepository> {
     @Override
     public StateRepository get() {
         // Heroku compatibility
-        var databaseUrl = System.getenv("JDBC_DATABASE_URL");
+        var databaseUrl = Environment.get("JDBC_DATABASE_URL");
         if (databaseUrl == null) {
-            databaseUrl = Environment.get("DATABASE_URL");
+            databaseUrl = Environment.getRequired("DATABASE_URL");
         }
 
         String databaseType = URI.create(databaseUrl.substring(5)).getScheme();
