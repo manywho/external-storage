@@ -3,6 +3,8 @@ package com.boomi.flow.external.storage.states;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 
+import java.time.format.DateTimeFormatter;
+
 public class SqlServerDatabaseRepository extends StateDatabaseRepository {
 
     public SqlServerDatabaseRepository(Jdbi jdbi)
@@ -21,9 +23,9 @@ public class SqlServerDatabaseRepository extends StateDatabaseRepository {
                 .bind("currentMapElement", state.getCurrentMapElementId())
                 .bind("currentUser", state.getCurrentUserId())
                 .bind("content", state.getContent())
-                .bind("createdAt", state.getCreatedAt())
-                .bind("updatedAt", state.getUpdatedAt())
-                .bind("expiresAt", state.getExpiresAt())
+                .bind("createdAt", state.getCreatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .bind("updatedAt", state.getUpdatedAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                .bind("expiresAt", state.getExpiresAt().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
                 .add();
     }
 

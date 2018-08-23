@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -298,9 +299,9 @@ public class SaveStateTest extends BaseTest {
         claims.setClaim("isDone", isDone);
         claims.setClaim("currentMapElement", currentMapElement);
         claims.setClaim("currentUser", currentUserId);
-        claims.setClaim("createdAt", createdAt);
-        claims.setClaim("updatedAt", updatedAt);
-        claims.setClaim("expiresAt", expiresAt);
+        claims.setClaim("createdAt", createdAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        claims.setClaim("updatedAt", updatedAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        claims.setClaim("expiresAt", expiresAt.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         claims.setClaim("content", content);
 
         // Create the signature for the actual content
