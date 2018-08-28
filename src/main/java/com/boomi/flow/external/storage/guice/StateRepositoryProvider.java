@@ -5,11 +5,11 @@ import com.boomi.flow.external.storage.states.MySqlStateDatabaseRepository;
 import com.boomi.flow.external.storage.states.PostgresqlStateDatabaseRepository;
 import com.boomi.flow.external.storage.states.SqlServerDatabaseRepository;
 import com.boomi.flow.external.storage.states.StateRepository;
-import com.google.inject.Provider;
 import com.manywho.sdk.services.utils.Environment;
 import org.jdbi.v3.core.Jdbi;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.net.URI;
 
 public class StateRepositoryProvider implements Provider<StateRepository> {
