@@ -2,6 +2,7 @@ package com.boomi.flow.external.storage.states;
 
 import com.boomi.flow.external.storage.keys.PlatformKeyResolver;
 import com.boomi.flow.external.storage.keys.ReceiverKeyResolver;
+import com.google.common.base.Strings;
 import com.manywho.sdk.services.utils.UUIDs;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -142,7 +143,10 @@ public class StateManager {
                 state.setTenantId(UUIDs.fromNullableString(claims.getStringClaimValue("tenant")));
                 state.setToken(stateRequest.getToken());
                 state.setUpdatedAt(OffsetDateTime.parse(claims.getStringClaimValue("updatedAt")));
-                state.setExpiresAt(OffsetDateTime.parse(claims.getStringClaimValue("expiresAt")));
+                if (Strings.isNullOrEmpty(claims.getStringClaimValue("expiresAt")) == false) {
+                    state.setExpiresAt(OffsetDateTime.parse(claims.getStringClaimValue("expiresAt")));
+                }
+
             } catch (MalformedClaimException e) {
                 throw new RuntimeException("Unable to load the state content from the incoming claims", e);
             }
