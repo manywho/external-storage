@@ -52,7 +52,7 @@ public class FindStateTest extends BaseTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
-        String state = decryptToken(new JSONObject(stateEncrypted).getString("token"));
+        String state = decryptToken(new JSONObject(stateEncrypted).getString("token"), tenantId);
         JSONAssert.assertEquals(validStateString, state, false);
 
         CommonStateTest.cleanSates(jdbi);

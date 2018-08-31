@@ -55,7 +55,7 @@ public class StateManager {
 
         // Create the claims, which will be the content of the JWT
         JwtClaims claims = new JwtClaims();
-        claims.setIssuer("receiver");  // who creates the token and signs it
+        claims.setIssuer(tenant.toString());  // who creates the token and signs it
         claims.setAudience("manywho"); // to whom the token is intended to be sent
         claims.setExpirationTimeMinutesInTheFuture(10); // time when the token will expire (10 minutes from now)
         claims.setGeneratedJwtId(); // a unique identifier for the token

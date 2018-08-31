@@ -171,7 +171,7 @@ public class BaseTest {
         }
     }
 
-    protected static String decryptToken(String token) throws JoseException, InvalidJwtException, MalformedClaimException {
+    protected static String decryptToken(String token, UUID tenantId) throws JoseException, InvalidJwtException, MalformedClaimException {
         PublicJsonWebKey platformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
         PublicJsonWebKey receiverFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
 
@@ -183,7 +183,7 @@ public class BaseTest {
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setRequireExpirationTime()
                 .setMaxFutureValidityInMinutes(300)
-                .setExpectedIssuer("receiver")
+                .setExpectedIssuer(tenantId.toString())
                 .setExpectedAudience("manywho")
                 .setDecryptionKey(platformFull.getPrivateKey())
                 .setVerificationKey(receiverFull.getPublicKey())
