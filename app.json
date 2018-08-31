@@ -12,11 +12,11 @@
   "env": {
     "RECEIVER_KEY": {
       "description": "You can get this value from the Boomi Flow platform",
-      "required": true
+      "required": false
     },
     "PLATFORM_KEY": {
       "description": "You can get this value from the Boomi Flow platform",
-      "required": true
+      "required": false
     }
   },
   "addons": [
