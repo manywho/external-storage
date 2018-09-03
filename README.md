@@ -61,12 +61,14 @@ $ mvn clean package
 
 ### Running
 
-The application is a RestEASY JAX-RS application, that by default is run under the Jetty server on port 8080 (if you
+The application is a RestEASY JAX-RS application, that by default is run under the Undertow server on port 8080 (if you
 use the packaged JAR).
+
+The default path for this app is `api/storage/1`.
 
 #### Defaults
 
-Running the following command will start the service listening on `0.0.0.0:8080`:
+Running the following command will start the service listening on `0.0.0.0:8080/api/storage/1`:
 
 ```bash
 $ java -jar target/external-storage.jar
