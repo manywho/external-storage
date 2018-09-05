@@ -51,7 +51,6 @@
             <artifactId>HikariCP</artifactId>
             <version>3.2.0</version>
         </dependency>
-
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
@@ -62,22 +61,21 @@
             <artifactId>jose4j</artifactId>
             <version>0.6.3</version>
         </dependency>
-
         <!-- Database drivers -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.2.2</version>
+            <version>42.2.4</version>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.11</version>
+            <version>8.0.12</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>6.4.0.jre8</version>
+            <version>7.0.0.jre10</version>
         </dependency>
         <!-- Test-->
         <dependency>
