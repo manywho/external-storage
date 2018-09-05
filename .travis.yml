@@ -10,23 +10,56 @@ jobs:
     - jdk: oraclejdk10
       env: DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD='root'
       script: sudo docker run -d --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=external_storage mysql:8
+
     - jdk: openjdk10
       env: DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD='root'
       script: sudo docker run -d --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=external_storage mysql:8
+
     - jdk: oraclejdk10
       env: DATABASE_URL='jdbc:sqlserver://localhost;database=external_storage' DATABASE_USERNAME='SA' DATABASE_PASSWORD='Password45'
       script:
         - sudo docker run --name sqlserver -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Password45' -e MSSQL_PID=Developer -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
         - sudo docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password45' -Q 'create database external_storage'
+
     - jdk: openjdk10
       env: DATABASE_URL='jdbc:sqlserver://localhost;database=external_storage' DATABASE_USERNAME='SA' DATABASE_PASSWORD='Password45'
       script:
         - sudo docker run --name sqlserver -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Password45' -e MSSQL_PID=Developer -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
         - sudo docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password45' -Q 'create database external_storage'
+
     - jdk: oraclejdk10
       env: DATABASE_URL='jdbc:postgresql://localhost:5433/external_storage' DATABASE_USERNAME='postgres' DATABASE_PASSWORD='postgres'
       script: sudo docker run --name postgresserver -p 5433:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=external_storage -d postgres:9.6
+
     - jdk: openjdk10
+      env: DATABASE_URL='jdbc:postgresql://localhost:5433/external_storage' DATABASE_USERNAME='postgres' DATABASE_PASSWORD='postgres'
+      script: sudo docker run --name postgresserver -p 5433:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=external_storage -d postgres:9.6
+
+    - jdk: oraclejdk9
+      env: DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD='root'
+      script: sudo docker run -d --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=external_storage mysql:8
+
+    - jdk: openjdk9
+      env: DATABASE_URL='jdbc:mysql://localhost/external_storage' DATABASE_USERNAME='root' DATABASE_PASSWORD='root'
+      script: sudo docker run -d --name mysqlserver -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=external_storage mysql:8
+
+    - jdk: oraclejdk9
+      env: DATABASE_URL='jdbc:sqlserver://localhost;database=external_storage' DATABASE_USERNAME='SA' DATABASE_PASSWORD='Password45'
+      script:
+        - sudo docker run --name sqlserver -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Password45' -e MSSQL_PID=Developer -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
+        - sudo docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password45' -Q 'create database external_storage'
+
+    - jdk: openjdk9
+      env: DATABASE_URL='jdbc:sqlserver://localhost;database=external_storage' DATABASE_USERNAME='SA' DATABASE_PASSWORD='Password45'
+      script:
+        - sudo docker run --name sqlserver -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=Password45' -e MSSQL_PID=Developer -p 1433:1433 -d microsoft/mssql-server-linux:2017-latest
+        - sudo docker exec -it sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password45' -Q 'create database external_storage'
+
+    - jdk: oraclejdk9
+      env: DATABASE_URL='jdbc:postgresql://localhost:5433/external_storage' DATABASE_USERNAME='postgres' DATABASE_PASSWORD='postgres'
+      script: sudo docker run --name postgresserver -p 5433:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=external_storage -d postgres:9.6
+
+    - jdk: openjdk9
       env: DATABASE_URL='jdbc:postgresql://localhost:5433/external_storage' DATABASE_USERNAME='postgres' DATABASE_PASSWORD='postgres'
       script: sudo docker run --name postgresserver -p 5433:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=external_storage -d postgres:9.6
 cache:
