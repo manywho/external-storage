@@ -16,7 +16,7 @@ usual `@` nomenclature.
 
 1. Fill in the appropriate configuration values in the `external-storage` file
 2. Copy it to `/etc/default/external-storage`
-3. Compile and package the service ([instruction availabe in the main README.md](https://github.com/manywho/external-storage))
+3. Compile and package the service ([instructions available in the main README.md](https://github.com/manywho/external-storage))
 4. Copy the compiled package to `/opt/boomi/flow/external-storage.jar`
 5. Copy `external-storage@.service` to your systemd unit folder (usually `/usr/lib/systemd/system`, or
 `/lib/systemd/system` on Debian)
