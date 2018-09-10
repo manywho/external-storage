@@ -78,7 +78,7 @@ public class SaveStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url, System.getenv("PLATFORM_KEY")))
                 .post(entity);
 
         Assert.assertEquals(204, response.getStatus());
@@ -169,7 +169,7 @@ public class SaveStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url, System.getenv("PLATFORM_KEY")))
                 .post(entity);
 
         Assert.assertEquals(204, response.getStatus());
@@ -198,7 +198,16 @@ public class SaveStateTest extends BaseTest {
     }
 
     @Test
-    public void testInsertState() throws URISyntaxException, IOException, JoseException, JSONException {
+    public void testInsertStateUsingPlatformAndReceiverKeyId() throws URISyntaxException, IOException, JoseException, JSONException {
+        this.testInsertState(System.getenv("PLATFORM_KEY_918f5a24-290e-4659-9cd6-c8d95aee92c6"), System.getenv("RECEIVER_KEY_918f5a24-290e-4659-9cd6-c8d95aee92c6"));
+    }
+
+    @Test
+    public void testInsertStateUsingPlatformAndReceiverKey() throws URISyntaxException, IOException, JoseException, JSONException {
+        this.testInsertState(System.getenv("PLATFORM_KEY"), System.getenv("RECEIVER_KEY"));
+    }
+
+    private void testInsertState(String platformKey, String receiverKey) throws URISyntaxException, IOException, JoseException, JSONException {
         String schema = attachRandomString("insertstate");
         createSchema(schema);
         Migrator.executeMigrations(dataSource(schema));
@@ -220,8 +229,8 @@ public class SaveStateTest extends BaseTest {
         UUID parentId = UUID.fromString("dfcf84e6-85de-11e8-adc0-fa7ae01bbebc");
 
         // you can find examples of the following keys at test/resources/example-key
-        PublicJsonWebKey platformFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
-        PublicJsonWebKey receiverFullKey = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("RECEIVER_KEY"));
+        PublicJsonWebKey platformFullKey = PublicJsonWebKey.Factory.newPublicJwk(platformKey);
+        PublicJsonWebKey receiverFullKey = PublicJsonWebKey.Factory.newPublicJwk(receiverKey);
 
         // encrypt and sign body
         StateRequest[] requestList = createSignedEncryptedBody(stateId, tenantId, parentId, flowId, flowVersionId,
@@ -234,7 +243,7 @@ public class SaveStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(url).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url, platformKey))
                 .post(entity);
 
         Assert.assertEquals(204, response.getStatus());
@@ -385,7 +394,7 @@ public class SaveStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(url)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 
@@ -403,7 +412,7 @@ public class SaveStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(url)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, url, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .post(validEntity());
 

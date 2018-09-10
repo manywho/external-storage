@@ -48,7 +48,7 @@ public class FindStateTest extends BaseTest {
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .get(String.class);
 
@@ -112,7 +112,7 @@ public class FindStateTest extends BaseTest {
         Response response = new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 
@@ -131,7 +131,7 @@ public class FindStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 

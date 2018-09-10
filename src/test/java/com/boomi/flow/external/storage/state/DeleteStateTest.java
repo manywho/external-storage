@@ -58,7 +58,7 @@ public class DeleteStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(uri).request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri, System.getenv("PLATFORM_KEY")))
                 .method("DELETE", entity);
 
         Assert.assertEquals(204, response.getStatus());
@@ -115,7 +115,7 @@ public class DeleteStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Receiver-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .method("DELETE", entity);
 
@@ -138,7 +138,7 @@ public class DeleteStateTest extends BaseTest {
         Response response =  new ResteasyClientBuilder().build().target(uri)
                 .request()
                 .header("X-ManyWho-Platform-Key-ID", "918f5a24-290e-4659-9cd6-c8d95aee92c6")
-                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri))
+                .header("X-ManyWho-Signature", createRequestSignature(tenantId, uri, System.getenv("PLATFORM_KEY")))
                 .accept(MediaType.APPLICATION_JSON)
                 .method("DELETE", entity);
 

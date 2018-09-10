@@ -133,7 +133,7 @@ public class BaseTest {
         return server;
     }
 
-    protected static String createRequestSignature(UUID tenant, String endpoint) throws JoseException {
+    protected static String createRequestSignature(UUID tenant, String endpoint, String platformKey) throws JoseException {
         URL url;
         try {
             url = new URL(endpoint);
@@ -158,7 +158,7 @@ public class BaseTest {
         JsonWebSignature jws = new JsonWebSignature();
         jws.setAlgorithmHeaderValue(AlgorithmIdentifiers.ECDSA_USING_P384_CURVE_AND_SHA384); // TODO: Check this
 
-        PublicJsonWebKey platformFull = PublicJsonWebKey.Factory.newPublicJwk(System.getenv("PLATFORM_KEY"));
+        PublicJsonWebKey platformFull = PublicJsonWebKey.Factory.newPublicJwk(platformKey);
 
         jws.setKey(platformFull.getPrivateKey());
         jws.setKeyIdHeaderValue(platformFull.getKeyId());

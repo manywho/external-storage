@@ -42,7 +42,7 @@ public class KeyRepositoryEnvironment implements KeyRepository {
         var variable = System.getenv()
                 .entrySet()
                 .stream()
-                .filter(entry -> entry.getKey().equals(String.format("%s_KEY_%s", baseName, id)))
+                .filter(entry -> entry.getKey().equals(String.format("%s_%s", baseName, id)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Couldn't find a " + type + " key with the ID " + id + " in an environment variable"));
 

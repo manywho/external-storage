@@ -27,6 +27,11 @@ The available configuration settings for the application are:
 * **RECEIVER_KEY** You can get this value from the Boomi Flow platform
 * **PLATFORM_KEY** You can get this value from the Boomi Flow platform
 
+Also is possible to configure many keys, adding the key id at the end of receiver and platform key, in this way:
+
+* **RECEIVER_KEY_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx** You can get this value from the Boomi Flow platform
+* **PLATFORM_KEY_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx** You can get this value from the Boomi Flow platform
+
 > **DATABASE_URL** examples
 > * **mysql** jdbc:mysql://your-host.com/external_storage_db
 > * **postgresql** jdbc:postgresql://your-host.com/external_storage_db
