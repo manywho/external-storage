@@ -1,8 +1,6 @@
 Boomi Flow External Storage [![Build Status](https://travis-ci.org/manywho/external-storage.svg?branch=master)](https://travis-ci.org/manywho/external-storage)
 ===========================
 
-> This application is currently in-development, and its API could change without warning!
-
 This application is the default implementation of the Boomi Flow External Storage API. It aims to serve the 90% use case
 for consumers of the API, so you can run it as-is, or customize it to fit your requirements if there's something missing.
 
