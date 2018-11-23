@@ -1,0 +1,1 @@
+ALTER TABLE states MODIFY current_map_element_id CHAR(36) NULL;
