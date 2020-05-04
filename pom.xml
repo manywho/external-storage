@@ -12,7 +12,7 @@
         <maven.compiler.source>10</maven.compiler.source>
         <maven.compiler.target>10</maven.compiler.target>
         <version.resteasy>3.5.1.Final</version.resteasy>
-        <version.manywho.sdk>2.0.0-beta-08</version.manywho.sdk>
+        <version.manywho.sdk>2.0.1</version.manywho.sdk>
     </properties>
 
     <dependencyManagement>
